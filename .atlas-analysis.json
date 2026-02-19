@@ -1,0 +1,99 @@
+{
+  "projectType": "general",
+  "projectName": "nvim-luffy",
+  "projectDescription": "A modern, opinionated Neovim configuration built with lazy.nvim and focused on developer productivity",
+  "theme": "aspen",
+  "primaryColor": "#E63946",
+  "lightColor": "#F1FAEE",
+  "darkColor": "#1D3557",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/overview",
+              "configuration/options",
+              "configuration/keymaps",
+              "configuration/autocommands"
+            ]
+          },
+          {
+            "group": "Plugins",
+            "pages": [
+              "plugins/overview",
+              "plugins/editor",
+              "plugins/ui",
+              "plugins/lsp",
+              "plugins/git",
+              "plugins/navigation"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/customization",
+              "guides/adding-plugins",
+              "guides/lsp-setup",
+              "guides/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "Core Modules",
+            "pages": [
+              "reference/core",
+              "reference/plugins",
+              "reference/lsp"
+            ]
+          },
+          {
+            "group": "Plugin Configurations",
+            "pages": [
+              "reference/telescope",
+              "reference/treesitter",
+              "reference/nvim-tree",
+              "reference/harpoon",
+              "reference/cmp",
+              "reference/colorscheme"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Lazy.nvim plugin management with automatic updates",
+    "Pre-configured LSP support for multiple languages",
+    "Telescope fuzzy finder for files and text search",
+    "Harpoon for quick file navigation",
+    "Treesitter syntax highlighting",
+    "Git integration with Neogit and Diffview",
+    "Auto-completion with nvim-cmp",
+    "Custom keymaps and autocommands"
+  ],
+  "publicApiSurface": [
+    "require('leyland.core')",
+    "require('leyland.lazy')",
+    "require('leyland.lsp')",
+    "require('leyland.core.options')",
+    "require('leyland.core.keymaps')",
+    "require('leyland.core.autocommands')",
+    "require('leyland.plugins')",
+    "require('leyland.plugins.lsp')"
+  ]
+}
