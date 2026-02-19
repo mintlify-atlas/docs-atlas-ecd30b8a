@@ -1,0 +1,148 @@
+---
+title: Keymaps
+description: Complete reference for nvim-luffy's keyboard shortcuts and keybindings
+---
+
+# Keymaps
+
+This page documents the core keybindings configured in `lua/leyland/core/keymaps.lua`. These are global keymaps that work across all buffers.
+
+<Note>
+Plugin-specific keymaps are documented in their respective plugin pages. This page only covers core keymaps.
+</Note>
+
+## Leader Key
+
+The leader key is mapped to **Space**:
+
+```lua
+vim.g.mapleader = " "
+```
+
+Press Space followed by other keys to trigger leader-based commands. The leader key is used throughout the configuration as a prefix for custom shortcuts.
+
+## Window Management
+
+<Accordion title="Split Windows">
+Create new window splits:
+
+| Keymap | Mode | Action | Description |
+|--------|------|--------|-------------|
+| `<leader>\|` | Normal | `<C-w>v` | Split window vertically |
+| `<leader>sh` | Normal | `<C-w>s` | Split window horizontally |
+
+```lua title="lua/leyland/core/keymaps.lua"
+keymap.set("n", "<leader>|", "<C-w>v", { desc = "Split window vertically" })
+keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
+```
+
+### Usage
+- Press `Space` + `|` to create a vertical split (side by side)
+- Press `Space` + `s` + `h` to create a horizontal split (top and bottom)
+</Accordion>
+
+<Accordion title="Navigate Between Windows">
+To move between windows, use Neovim's built-in commands:
+
+| Keymap | Action |
+|--------|--------|
+| `<C-w>h` | Move to left window |
+| `<C-w>j` | Move to window below |
+| `<C-w>k` | Move to window above |
+| `<C-w>l` | Move to right window |
+| `<C-w>w` | Cycle through windows |
+
+These are Neovim defaults and work out of the box.
+</Accordion>
+
+## Buffer Management
+
+<Accordion title="Close Buffers">
+Manage open buffers:
+
+| Keymap | Mode | Action | Description |
+|--------|------|--------|-------------|
+| `<leader>bd` | Normal | `:bd` | Close current buffer |
+| `<leader>ba` | Normal | `:%bd` | Close all buffers |
+
+```lua title="lua/leyland/core/keymaps.lua"
+keymap.set("n", "<leader>bd", "<cmd>bd<CR>", { desc = "Close buffer" })
+keymap.set("n", "<leader>ba", "<cmd>%bd<CR>", { desc = "Close all buffers" })
+```
+
+### Usage
+- Press `Space` + `b` + `d` to close the current buffer
+- Press `Space` + `b` + `a` to close all open buffers
+
+<Warning>
+Closing all buffers with `<leader>ba` will close every open buffer in your session. Use with caution.
+</Warning>
+</Accordion>
+
+## Disabled Keymaps
+
+Some keymaps are commented out in the configuration but documented here for reference:
+
+<Accordion title="Insert Mode Escape (Disabled)">
+```lua
+-- keymap.set("i", "jk", "<ESC>", {desc = "Exit Insert mode with jk"})
+```
+
+This keymap would allow pressing `j` followed quickly by `k` in insert mode to escape to normal mode. It's commented out by default but can be enabled if desired.
+</Accordion>
+
+<Accordion title="Clear Search Highlights (Disabled)">
+```lua
+-- keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
+```
+
+This keymap would manually clear search highlights. It's disabled because nvim-luffy automatically clears search highlights when the cursor moves (see [Autocommands](/configuration/autocommands)).
+</Accordion>
+
+## Adding Custom Keymaps
+
+To add your own keybindings, edit `lua/leyland/core/keymaps.lua`:
+
+```lua title="lua/leyland/core/keymaps.lua"
+local keymap = vim.keymap
+
+-- Add your custom keymaps
+keymap.set("n", "<leader>w", "<cmd>w<CR>", { desc = "Save file" })
+keymap.set("n", "<leader>q", "<cmd>q<CR>", { desc = "Quit" })
+keymap.set("v", "<leader>y", '"+y', { desc = "Copy to system clipboard" })
+```
+
+### Keymap Structure
+
+The `vim.keymap.set()` function takes these parameters:
+
+1. **Mode** - The mode where the keymap is active:
+   - `"n"` - Normal mode
+   - `"i"` - Insert mode
+   - `"v"` - Visual mode
+   - `"x"` - Visual block mode
+   - `"t"` - Terminal mode
+
+2. **Key sequence** - The keys to press (e.g., `"<leader>w"`)
+
+3. **Action** - The command or key sequence to execute
+
+4. **Options** - Table with additional options:
+   - `desc` - Description shown in which-key or help
+   - `silent` - Don't show command in command line
+   - `noremap` - Don't use recursive mapping (default true)
+
+## Plugin Keymaps
+
+Many plugins add their own keybindings. Check the plugin documentation pages:
+
+- [Telescope](/reference/telescope) - Fuzzy finder keymaps
+- [nvim-tree](/reference/nvim-tree) - File explorer keymaps
+- [LSP](/reference/lsp) - Language server keymaps
+- And more in the [Plugins](/plugins/overview) section
+
+## See Also
+
+- [Options](/configuration/options) - Editor settings
+- [Autocommands](/configuration/autocommands) - Automatic behaviors
+- [Configuration Overview](/configuration/overview) - Overall structure

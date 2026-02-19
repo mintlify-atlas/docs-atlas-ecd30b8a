@@ -1,0 +1,451 @@
+---
+title: LSP Setup
+description: Configure language servers, formatters, and linters in nvim-luffy
+---
+
+## Overview
+
+nvim-luffy uses [mason.nvim](https://github.com/williamboman/mason.nvim) to manage LSP servers, formatters, and linters. Mason provides a unified interface for installing and managing development tools.
+
+## How LSP Works in nvim-luffy
+
+The LSP configuration consists of three main components:
+
+1. **mason.nvim** - Installs and manages LSP servers and tools
+2. **mason-lspconfig.nvim** - Bridges mason with nvim-lspconfig
+3. **conform.nvim** - Handles formatting with external formatters
+
+## Currently Installed Language Servers
+
+nvim-luffy comes with these language servers pre-configured:
+
+<CardGroup cols={2}>
+  <Card title="TypeScript/JavaScript" icon="js">
+    - **ts_ls** - TypeScript language server
+    - **eslint** - JavaScript/TypeScript linting
+  </Card>
+  
+  <Card title="Web Development" icon="code">
+    - **html** - HTML language server
+    - **cssls** - CSS language server
+    - **emmet_ls** - Emmet abbreviations
+    - **tailwindcss** - Tailwind CSS IntelliSense
+  </Card>
+  
+  <Card title="Frameworks" icon="react">
+    - **svelte** - Svelte language server
+    - **graphql** - GraphQL language server
+    - **prismals** - Prisma language server
+  </Card>
+  
+  <Card title="Python & Lua" icon="python">
+    - **pyright** - Python language server
+    - **lua_ls** - Lua language server
+  </Card>
+</CardGroup>
+
+## Adding a New Language Server
+
+Follow these steps to add support for a new programming language.
+
+<Steps>
+  <Step title="Find the server name">
+    Check the [mason-lspconfig server list](https://github.com/williamboman/mason-lspconfig.nvim/blob/main/doc/server-mapping.md) for available servers.
+    
+    For example, to add Rust support, you'd use `rust_analyzer`.
+  </Step>
+  
+  <Step title="Add to mason-lspconfig">
+    Edit `lua/leyland/plugins/lsp/mason.lua` and add the server to `ensure_installed`:
+    
+    ```lua
+    return {
+      {
+        "williamboman/mason-lspconfig.nvim",
+        opts = {
+          ensure_installed = {
+            "ts_ls",
+            "html",
+            "cssls",
+            "tailwindcss",
+            "svelte",
+            "lua_ls",
+            "graphql",
+            "emmet_ls",
+            "prismals",
+            "pyright",
+            "eslint",
+            "rust_analyzer",  -- Add your new server here
+          },
+        },
+        dependencies = {
+          {
+            "williamboman/mason.nvim",
+            opts = {
+              ui = {
+                icons = {
+                  package_installed = "✓",
+                  package_pending = "➜",
+                  package_uninstalled = "✗",
+                },
+              },
+            },
+          },
+          "neovim/nvim-lspconfig",
+        },
+      },
+    }
+    ```
+  </Step>
+  
+  <Step title="Restart and install">
+    Restart Neovim or run:
+    
+    ```vim
+    :Lazy sync
+    ```
+    
+    The server will be automatically installed by mason.
+  </Step>
+  
+  <Step title="Verify installation">
+    Check the installation status:
+    
+    ```vim
+    :Mason
+    ```
+    
+    Your new server should appear with a ✓ icon.
+  </Step>
+  
+  <Step title="Test the LSP">
+    Open a file of the appropriate language and check LSP status:
+    
+    ```vim
+    :LspInfo
+    ```
+    
+    The server should be attached and running.
+  </Step>
+</Steps>
+
+<Note>
+Most language servers work out of the box. For servers requiring additional configuration, see the [Custom LSP Configuration](#custom-lsp-configuration) section.
+</Note>
+
+## Adding Formatters and Linters
+
+### Current Formatters
+
+nvim-luffy includes these formatters:
+
+- **prettier** - JavaScript, TypeScript, HTML, CSS, JSON, Markdown
+- **stylua** - Lua formatter
+- **black** - Python formatter
+- **isort** - Python import sorter
+- **eslint_d** - Fast ESLint daemon
+- **pylint** - Python linter
+
+### Adding a New Formatter
+
+<Steps>
+  <Step title="Add to mason-tool-installer">
+    Edit `lua/leyland/plugins/lsp/mason.lua` and add to `ensure_installed`:
+    
+    ```lua
+    {
+      "WhoIsSethDaniel/mason-tool-installer.nvim",
+      opts = {
+        ensure_installed = {
+          "prettier",
+          "stylua",
+          "isort",
+          "black",
+          "pylint",
+          "eslint_d",
+          "rustfmt",    -- Add new formatters here
+        },
+      },
+      dependencies = {
+        "williamboman/mason.nvim",
+      },
+    }
+    ```
+  </Step>
+  
+  <Step title="Configure in conform.nvim">
+    Edit `lua/leyland/plugins/formatting.lua` to use the formatter:
+    
+    ```lua
+    conform.setup({
+      formatters_by_ft = {
+        javascript = { "prettier" },
+        typescript = { "prettier" },
+        lua = { "stylua" },
+        python = { "isort", "black" },
+        rust = { "rustfmt" },  -- Add your formatter
+      },
+      format_on_save = {
+        lsp_fallback = true,
+        async = false,
+        timeout_ms = 3000,
+      },
+    })
+    ```
+  </Step>
+  
+  <Step title="Install and test">
+    Run `:Lazy sync` and `:Mason` to install the formatter.
+    
+    Test formatting with `<leader>mp` or by saving a file.
+  </Step>
+</Steps>
+
+### Configuring Format-on-Save
+
+Edit `lua/leyland/plugins/formatting.lua` to customize format-on-save behavior:
+
+```lua
+format_on_save = {
+  lsp_fallback = true,  -- Use LSP if no formatter configured
+  async = false,        -- Format synchronously
+  timeout_ms = 3000,    -- Format timeout
+}
+```
+
+To disable format-on-save, set it to `false`:
+
+```lua
+format_on_save = false,
+```
+
+You can still manually format with `<leader>mp`.
+
+## Custom LSP Configuration
+
+Some language servers require custom configuration. Add this to `lua/leyland/plugins/lsp/lsp.lua`.
+
+### Example: Customizing lua_ls
+
+```lua
+return {
+  "neovim/nvim-lspconfig",
+  event = { "BufReadPre", "BufNewFile" },
+  config = function()
+    local lspconfig = require("lspconfig")
+    
+    -- Custom lua_ls configuration
+    lspconfig.lua_ls.setup({
+      settings = {
+        Lua = {
+          diagnostics = {
+            globals = { "vim" },  -- Recognize 'vim' global
+          },
+          workspace = {
+            library = {
+              [vim.fn.expand("$VIMRUNTIME/lua")] = true,
+              [vim.fn.stdpath("config") .. "/lua"] = true,
+            },
+          },
+        },
+      },
+    })
+  end,
+}
+```
+
+### Example: Custom Capabilities
+
+```lua
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+lspconfig.ts_ls.setup({
+  capabilities = capabilities,
+  settings = {
+    typescript = {
+      inlayHints = {
+        includeInlayParameterNameHints = "all",
+        includeInlayFunctionParameterTypeHints = true,
+      },
+    },
+  },
+})
+```
+
+## Configuring LSP Behavior
+
+### Keybindings
+
+LSP keybindings are typically set in the LSP config. Add this to your LSP setup:
+
+```lua
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+  callback = function(ev)
+    local opts = { buffer = ev.buf }
+    
+    vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+    vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+    vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+    vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+    vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+  end,
+})
+```
+
+### LSP Log Level
+
+Control LSP logging in `lua/leyland/core/options.lua`:
+
+```lua
+-- Only show errors
+vim.lsp.set_log_level("error")
+
+-- Show all messages (useful for debugging)
+vim.lsp.set_log_level("debug")
+```
+
+### Diagnostic Configuration
+
+Customize diagnostic display:
+
+```lua
+vim.diagnostic.config({
+  virtual_text = true,      -- Show inline diagnostics
+  signs = true,             -- Show signs in sign column
+  underline = true,         -- Underline problematic text
+  update_in_insert = false, -- Don't update during insert mode
+  severity_sort = true,     -- Sort by severity
+})
+```
+
+## Mason UI
+
+Manage your tools with the Mason interface:
+
+```vim
+:Mason              " Open Mason UI
+:MasonUpdate        " Update Mason registry
+:MasonInstall <pkg> " Install a package
+:MasonUninstall <pkg> " Uninstall a package
+:MasonLog           " View Mason logs
+```
+
+### Mason UI Navigation
+
+- `i` - Install package under cursor
+- `u` - Update package under cursor
+- `X` - Uninstall package under cursor
+- `/` - Search for packages
+- `q` - Close Mason UI
+
+## Common LSP Issues
+
+<AccordionGroup>
+  <Accordion title="Server not attaching to buffer">
+    **Symptoms**: No LSP features (autocomplete, diagnostics) available.
+    
+    **Solutions**:
+    1. Check server is installed: `:Mason`
+    2. Verify server is running: `:LspInfo`
+    3. Check for errors: `:messages`
+    4. Restart LSP: `:LspRestart`
+  </Accordion>
+  
+  <Accordion title="Formatter not working">
+    **Symptoms**: Format-on-save or manual format does nothing.
+    
+    **Solutions**:
+    1. Check formatter is installed: `:Mason`
+    2. Verify filetype mapping in `formatting.lua`
+    3. Test manually: `:ConformInfo`
+    4. Check timeout: increase `timeout_ms` in config
+  </Accordion>
+  
+  <Accordion title="Too many diagnostics/errors">
+    **Symptoms**: Overwhelming number of warnings/errors.
+    
+    **Solutions**:
+    1. Disable virtual text: `virtual_text = false` in diagnostic config
+    2. Increase log level: `vim.lsp.set_log_level("error")`
+    3. Configure specific server to be less strict
+    4. Use `:LspStop` to temporarily disable
+  </Accordion>
+  
+  <Accordion title="Slow formatting">
+    **Symptoms**: File save is slow due to formatting.
+    
+    **Solutions**:
+    1. Increase timeout: `timeout_ms = 5000`
+    2. Use async formatting: `async = true`
+    3. Disable format-on-save: `format_on_save = false`
+    4. Use faster formatter (e.g., `eslint_d` instead of `eslint`)
+  </Accordion>
+  
+  <Accordion title="Missing language features">
+    **Symptoms**: Some features (go-to-definition, hover) don't work.
+    
+    **Solutions**:
+    1. Check server capabilities: `:lua =vim.lsp.get_active_clients()[1].server_capabilities`
+    2. Ensure server supports the feature
+    3. Check for configuration issues
+    4. Try alternative language server
+  </Accordion>
+</AccordionGroup>
+
+## Advanced Configuration
+
+### Per-Project LSP Settings
+
+Create `.nvim.lua` in your project root:
+
+```lua
+vim.lsp.start({
+  name = "project-lsp",
+  cmd = { "path/to/lsp" },
+  root_dir = vim.fn.getcwd(),
+})
+```
+
+### Conditional Formatting
+
+Format only specific filetypes:
+
+```lua
+format_on_save = function(bufnr)
+  -- Disable format-on-save for TypeScript
+  if vim.bo[bufnr].filetype == "typescript" then
+    return false
+  end
+  
+  return {
+    lsp_fallback = true,
+    timeout_ms = 3000,
+  }
+end,
+```
+
+### Multiple Formatters
+
+Run formatters in sequence:
+
+```lua
+formatters_by_ft = {
+  -- Run isort first, then black
+  python = { "isort", "black" },
+  
+  -- Run either prettier OR eslint_d (first available)
+  javascript = { { "prettier", "eslint_d" } },
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Troubleshooting" icon="wrench" href="/guides/troubleshooting">
+    Common issues and solutions
+  </Card>
+  <Card title="Customization" icon="sliders" href="/guides/customization">
+    Customize nvim-luffy to your workflow
+  </Card>
+</CardGroup>

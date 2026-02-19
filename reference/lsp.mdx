@@ -1,0 +1,359 @@
+---
+title: 'LSP Module'
+description: 'Complete reference for nvim-luffy LSP configuration'
+---
+
+## Overview
+
+The LSP module provides Language Server Protocol support with automatic server installation, configuration, and keybindings. It integrates Mason for package management and configures diagnostic display.
+
+---
+
+## Core LSP Configuration
+
+**Location:** `lua/leyland/lsp.lua`
+
+### LSP Attach Autocommand
+
+Keybindings and settings are automatically applied when an LSP client attaches to a buffer.
+
+```lua
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+  callback = function(ev)
+    -- Keybindings configured here
+  end,
+})
+```
+
+---
+
+## LSP Keybindings
+
+All keybindings are buffer-local and only active when LSP is attached.
+
+### Navigation Keymaps
+
+| Key | Mode | Action | Description |
+|-----|------|--------|-------------|
+| `gR` | Normal | `<cmd>Telescope lsp_references<CR>` | Show LSP references in Telescope |
+| `gd` | Normal | `vim.lsp.buf.definition` | Go to definition |
+| `gi` | Normal | `<cmd>Telescope lsp_implementations<CR>` | Show LSP implementations |
+| `gt` | Normal | `<cmd>Telescope lsp_type_definitions<CR>` | Show LSP type definitions |
+
+### Code Actions
+
+| Key | Mode | Action | Description |
+|-----|------|--------|-------------|
+| `<leader>ca` | Normal, Visual | `vim.lsp.buf.code_action` | See available code actions |
+| `<leader>rn` | Normal | `vim.lsp.buf.rename` | Smart rename symbol |
+
+### Diagnostics
+
+| Key | Mode | Action | Description |
+|-----|------|--------|-------------|
+| `<leader>D` | Normal | `<cmd>Telescope diagnostics bufnr=0<CR>` | Show buffer diagnostics |
+| `<leader>d` | Normal | `vim.diagnostic.open_float` | Show line diagnostics in float |
+| `[d` | Normal | `vim.diagnostic.jump({ count = -1, float = true })` | Go to previous diagnostic |
+| `]d` | Normal | `vim.diagnostic.jump({ count = 1, float = true })` | Go to next diagnostic |
+
+### Documentation
+
+| Key | Mode | Action | Description |
+|-----|------|--------|-------------|
+| `K` | Normal | `vim.lsp.buf.hover` | Show documentation for symbol under cursor |
+
+### LSP Management
+
+| Key | Mode | Action | Description |
+|-----|------|--------|-------------|
+| `<leader>rs` | Normal | `:LspRestart<CR>` | Restart LSP server |
+
+---
+
+## Diagnostic Configuration
+
+### Severity Levels
+
+```lua
+local severity = vim.diagnostic.severity
+-- Levels: ERROR, WARN, HINT, INFO
+```
+
+### Underline Settings
+
+```lua
+vim.diagnostic.config({
+  underline = {
+    severity = { min = severity.ERROR },
+  },
+})
+```
+
+Only errors are underlined. Warnings, hints, and info are not underlined.
+
+### Diagnostic Signs
+
+| Severity | Icon | Unicode |
+|----------|------|--------|
+| ERROR | ` ` | U+E009 |
+| WARN | ` ` | U+E006 |
+| HINT | `󰠠 ` | U+F0820 |
+| INFO | ` ` | U+E00A |
+
+```lua
+vim.diagnostic.config({
+  signs = {
+    text = {
+      [severity.ERROR] = " ",
+      [severity.WARN] = " ",
+      [severity.HINT] = "󰠠 ",
+      [severity.INFO] = " ",
+    },
+  },
+})
+```
+
+### Inlay Hints
+
+```lua
+-- vim.lsp.inlay_hint.enable(true)
+```
+
+Inlay hints are disabled by default but can be enabled by uncommenting.
+
+---
+
+## LSP Plugin Configuration
+
+**Location:** `lua/leyland/plugins/lsp/lsp.lua`
+
+### cmp-nvim-lsp Integration
+
+```lua
+return {
+  "hrsh7th/cmp-nvim-lsp",
+  event = { "BufReadPre", "BufNewFile" },
+  dependencies = {
+    { "antosha417/nvim-lsp-file-operations", config = true },
+    { "folke/lazydev.nvim", opts = {} },
+  },
+  config = function()
+    local cmp_nvim_lsp = require("cmp_nvim_lsp")
+    local capabilities = cmp_nvim_lsp.default_capabilities()
+    
+    vim.lsp.config("*", {
+      capabilities = capabilities,
+    })
+  end,
+}
+```
+
+**Purpose:** Enables autocompletion capabilities for all LSP servers.
+
+**Dependencies:**
+- `nvim-lsp-file-operations` - File operation support (rename, move files)
+- `lazydev.nvim` - Enhanced Lua development with Neovim API completion
+
+---
+
+## Mason Configuration
+
+**Location:** `lua/leyland/plugins/lsp/mason.lua`
+
+### Mason LSP Config
+
+```lua
+{
+  "williamboman/mason-lspconfig.nvim",
+  opts = {
+    ensure_installed = {
+      "ts_ls",        -- TypeScript/JavaScript
+      "html",         -- HTML
+      "cssls",        -- CSS
+      "tailwindcss",  -- Tailwind CSS
+      "svelte",       -- Svelte
+      "lua_ls",       -- Lua
+      "graphql",      -- GraphQL
+      "emmet_ls",     -- Emmet
+      "prismals",     -- Prisma
+      "pyright",      -- Python
+      "eslint",       -- ESLint
+    },
+  },
+}
+```
+
+**Purpose:** Automatically installs and configures language servers.
+
+### Mason UI Configuration
+
+```lua
+{
+  "williamboman/mason.nvim",
+  opts = {
+    ui = {
+      icons = {
+        package_installed = "✓",
+        package_pending = "➜",
+        package_uninstalled = "✗",
+      },
+    },
+  },
+}
+```
+
+### Mason Tool Installer
+
+```lua
+{
+  "WhoIsSethDaniel/mason-tool-installer.nvim",
+  opts = {
+    ensure_installed = {
+      "prettier",  -- Formatter for JS/TS/CSS/HTML/JSON
+      "stylua",    -- Lua formatter
+      "isort",     -- Python import sorter
+      "black",     -- Python formatter
+      "pylint",    -- Python linter
+      "eslint_d",  -- Fast ESLint daemon
+    },
+  },
+}
+```
+
+**Purpose:** Automatically installs formatters and linters.
+
+---
+
+## Installed Language Servers
+
+| Server | Language | Description |
+|--------|----------|-------------|
+| `ts_ls` | TypeScript/JavaScript | TypeScript language server |
+| `html` | HTML | HTML language server |
+| `cssls` | CSS | CSS language server |
+| `tailwindcss` | Tailwind CSS | Tailwind CSS IntelliSense |
+| `svelte` | Svelte | Svelte language server |
+| `lua_ls` | Lua | Lua language server |
+| `graphql` | GraphQL | GraphQL language server |
+| `emmet_ls` | Emmet | Emmet abbreviation expansion |
+| `prismals` | Prisma | Prisma schema language server |
+| `pyright` | Python | Python language server |
+| `eslint` | JavaScript/TypeScript | ESLint language server |
+
+---
+
+## Installed Formatters & Linters
+
+| Tool | Type | Languages | Description |
+|------|------|-----------|-------------|
+| `prettier` | Formatter | JS, TS, CSS, HTML, JSON, Markdown | Opinionated code formatter |
+| `stylua` | Formatter | Lua | Lua code formatter |
+| `isort` | Formatter | Python | Python import organizer |
+| `black` | Formatter | Python | Python code formatter |
+| `pylint` | Linter | Python | Python code analyzer |
+| `eslint_d` | Linter | JavaScript, TypeScript | Fast ESLint daemon |
+
+---
+
+## Mason Commands
+
+| Command | Description |
+|---------|-------------|
+| `:Mason` | Open Mason UI |
+| `:MasonInstall <package>` | Install a package |
+| `:MasonUninstall <package>` | Uninstall a package |
+| `:MasonUpdate` | Update all packages |
+| `:MasonLog` | Show Mason log |
+
+---
+
+## API Reference
+
+### Adding a Language Server
+
+To add a new language server:
+
+1. Add to `ensure_installed` in `lua/leyland/plugins/lsp/mason.lua`:
+
+```lua
+ensure_installed = {
+  -- Existing servers...
+  "rust_analyzer",  -- Add Rust support
+}
+```
+
+2. Restart Neovim - Mason will automatically install and configure it
+
+### Custom LSP Settings
+
+To configure server-specific settings:
+
+```lua
+-- In your config after nvim-luffy loads
+vim.lsp.config.lua_ls = {
+  settings = {
+    Lua = {
+      diagnostics = {
+        globals = { "vim" },
+      },
+    },
+  },
+}
+```
+
+### Disable Diagnostic Underline
+
+```lua
+vim.diagnostic.config({
+  underline = false,
+})
+```
+
+### Enable Inlay Hints
+
+```lua
+vim.lsp.inlay_hint.enable(true)
+```
+
+### Custom Diagnostic Icons
+
+```lua
+vim.diagnostic.config({
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = "E",
+      [vim.diagnostic.severity.WARN] = "W",
+      [vim.diagnostic.severity.HINT] = "H",
+      [vim.diagnostic.severity.INFO] = "I",
+    },
+  },
+})
+```
+
+---
+
+## Troubleshooting
+
+### LSP Not Starting
+
+1. Check if server is installed: `:Mason`
+2. Check LSP status: `:LspInfo`
+3. Check logs: `:LspLog`
+4. Restart LSP: `<leader>rs`
+
+### Server Not Auto-installing
+
+1. Update Mason: `:MasonUpdate`
+2. Manually install: `:MasonInstall <server>`
+3. Check Mason log: `:MasonLog`
+
+### Diagnostics Not Showing
+
+```lua
+-- Check diagnostic configuration
+:lua =vim.diagnostic.config()
+
+-- Check if diagnostics exist
+:lua =vim.diagnostic.get(0)
+```

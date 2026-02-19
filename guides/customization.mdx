@@ -1,0 +1,304 @@
+---
+title: Customization Guide
+description: Learn how to customize nvim-luffy to match your workflow and preferences
+---
+
+## Overview
+
+nvim-luffy is designed to be customizable. You can modify options, keymaps, autocommands, and visual elements to match your workflow.
+
+## Modifying Options
+
+Neovim options are configured in `lua/leyland/core/options.lua`.
+
+<Steps>
+  <Step title="Open the options file">
+    Edit `lua/leyland/core/options.lua` to modify Neovim settings.
+  </Step>
+  
+  <Step title="Add or modify options">
+    Use the `vim.opt` API to set options:
+    
+    ```lua
+    local opt = vim.opt
+    
+    -- Line numbers
+    opt.relativenumber = true
+    opt.number = true
+    
+    -- Indentation
+    opt.tabstop = 2
+    opt.shiftwidth = 2
+    opt.expandtab = true
+    
+    -- Search
+    opt.ignorecase = true
+    opt.smartcase = true
+    
+    -- Custom option example
+    opt.cursorline = true  -- Highlight current line
+    opt.wrap = true        -- Enable line wrapping
+    ```
+  </Step>
+  
+  <Step title="Save and restart">
+    Save the file and restart Neovim. Changes will take effect immediately.
+  </Step>
+</Steps>
+
+### Common Options to Customize
+
+- **`opt.tabstop`** - Number of spaces a tab counts for
+- **`opt.shiftwidth`** - Number of spaces for indentation
+- **`opt.wrap`** - Enable/disable line wrapping
+- **`opt.cursorline`** - Highlight the current line
+- **`opt.signcolumn`** - Show/hide the sign column
+- **`opt.cmdheight`** - Height of the command line
+
+## Customizing Keymaps
+
+Keymaps are defined in `lua/leyland/core/keymaps.lua`.
+
+<Steps>
+  <Step title="Open the keymaps file">
+    Edit `lua/leyland/core/keymaps.lua` to add or modify keybindings.
+  </Step>
+  
+  <Step title="Add new keymaps">
+    Use `vim.keymap.set()` to define new keybindings:
+    
+    ```lua
+    local keymap = vim.keymap
+    
+    -- Window management
+    keymap.set("n", "<leader>|", "<C-w>v", { desc = "Split window vertically" })
+    keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
+    
+    -- Buffer management
+    keymap.set("n", "<leader>bd", "<cmd>bd<CR>", { desc = "Close buffer" })
+    keymap.set("n", "<leader>ba", "<cmd>%bd<CR>", { desc = "Close all buffers" })
+    
+    -- Custom keymap examples
+    keymap.set("n", "<leader>w", "<cmd>w<CR>", { desc = "Save file" })
+    keymap.set("n", "<leader>q", "<cmd>q<CR>", { desc = "Quit" })
+    keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode" })
+    ```
+  </Step>
+  
+  <Step title="Test your keymaps">
+    Save and reload Neovim. Try your new keybindings to ensure they work as expected.
+  </Step>
+</Steps>
+
+### Keymap Parameters
+
+- **First parameter**: Mode (`"n"` = normal, `"i"` = insert, `"v"` = visual)
+- **Second parameter**: Key combination
+- **Third parameter**: Command or function to execute
+- **Fourth parameter**: Options table with `desc` for Which-Key descriptions
+
+<Note>
+The leader key is set to `<Space>` in nvim-luffy (`vim.g.mapleader = " "`).
+</Note>
+
+## Adding Autocommands
+
+Autocommands are defined in `lua/leyland/core/autocommands.lua`.
+
+<Steps>
+  <Step title="Open the autocommands file">
+    Edit `lua/leyland/core/autocommands.lua`.
+  </Step>
+  
+  <Step title="Add new autocommands">
+    Use `vim.api.nvim_create_autocmd()` to create autocommands:
+    
+    ```lua
+    local function augroup(name)
+      return vim.api.nvim_create_augroup("leyland_" .. name, { clear = true })
+    end
+    
+    -- Highlight on yank (existing example)
+    vim.api.nvim_create_autocmd("TextYankPost", {
+      group = augroup("highlight_yank"),
+      callback = function()
+        (vim.hl or vim.highlight).on_yank()
+      end,
+    })
+    
+    -- Custom autocommand examples
+    -- Auto-format on save for specific filetypes
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      group = augroup("auto_format"),
+      pattern = { "*.lua", "*.ts", "*.js" },
+      callback = function()
+        vim.lsp.buf.format({ async = false })
+      end,
+    })
+    
+    -- Auto-save when leaving insert mode
+    vim.api.nvim_create_autocmd("InsertLeave", {
+      group = augroup("auto_save"),
+      pattern = "*",
+      callback = function()
+        if vim.bo.modified then
+          vim.cmd("silent! write")
+        end
+      end,
+    })
+    ```
+  </Step>
+</Steps>
+
+## Changing the Colorscheme
+
+nvim-luffy comes with several colorschemes pre-installed.
+
+<Steps>
+  <Step title="View available colorschemes">
+    Open `lua/leyland/plugins/colorscheme.lua` to see installed themes:
+    
+    - **catppuccin** - Soothing pastel theme
+    - **tokyonight** - Clean, dark theme
+    - **modus-themes** - Highly accessible themes
+    - **bamboo** (default) - Green-tinted theme
+    - **onedark** - Atom-inspired theme
+    - **rose-pine** - Natural pine, subtle colors
+  </Step>
+  
+  <Step title="Change the active colorscheme">
+    Edit the `config` function in `colorscheme.lua`:
+    
+    ```lua
+    {
+      "rose-pine/neovim",
+      name = "rose-pine",
+      priority = 1000,
+      config = function()
+        -- Change this line to set your preferred colorscheme
+        vim.cmd.colorscheme("tokyonight")
+      end,
+    }
+    ```
+  </Step>
+  
+  <Step title="Add a new colorscheme">
+    To install a new theme, add it to the colorscheme.lua file:
+    
+    ```lua
+    {
+      "rebelot/kanagawa.nvim",
+      priority = 1000,
+      config = function()
+        vim.cmd.colorscheme("kanagawa")
+      end,
+    }
+    ```
+  </Step>
+  
+  <Step title="Apply changes">
+    Run `:Lazy sync` in Neovim to install the new theme, then restart.
+  </Step>
+</Steps>
+
+<Note>
+Only one colorscheme should have the `vim.cmd.colorscheme()` call in its config. The others should have this commented out or removed.
+</Note>
+
+## Customizing the Dashboard
+
+The dashboard (alpha-nvim) is configured in `lua/leyland/plugins/alpha.lua`.
+
+<Steps>
+  <Step title="Open the alpha configuration">
+    Edit `lua/leyland/plugins/alpha.lua`.
+  </Step>
+  
+  <Step title="Customize the header art">
+    Replace the ASCII art in `dashboard.section.header.val`:
+    
+    ```lua
+    dashboard.section.header.val = {
+      "                                                     ",
+      "  ███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗",
+      "  ████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║",
+      "  ██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║",
+      "  ██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║",
+      "  ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║",
+      "  ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝",
+      "                                                     ",
+    }
+    ```
+  </Step>
+  
+  <Step title="Modify the menu buttons">
+    Edit `dashboard.section.buttons.val` to change menu items:
+    
+    ```lua
+    dashboard.section.buttons.val = {
+      dashboard.button("f", "  Find file", ":Telescope find_files <CR>"),
+      dashboard.button("r", "  Recent files", ":Telescope oldfiles <CR>"),
+      dashboard.button("s", "  Find text", ":Telescope live_grep <CR>"),
+      dashboard.button("c", "  Config", ":e ~/.config/nvim/init.lua <CR>"),
+      dashboard.button("q", "  Quit", ":qa<CR>"),
+    }
+    ```
+  </Step>
+  
+  <Step title="Change the footer quote">
+    Edit `dashboard.section.footer.val`:
+    
+    ```lua
+    dashboard.section.footer.val = {
+      "",
+      "Your custom quote here!",
+      "",
+    }
+    ```
+  </Step>
+</Steps>
+
+## Best Practices for Customization
+
+<AccordionGroup>
+  <Accordion title="Keep core structure intact">
+    Avoid modifying the fundamental structure of nvim-luffy. Make additive changes rather than removing core functionality.
+  </Accordion>
+  
+  <Accordion title="Document your changes">
+    Add comments explaining why you made specific customizations. This helps when you revisit the config later.
+    
+    ```lua
+    -- Increased timeout for slow formatters
+    opt.timeout = 5000
+    ```
+  </Accordion>
+  
+  <Accordion title="Test incrementally">
+    Make one change at a time and test it before moving to the next. This makes it easier to identify issues.
+  </Accordion>
+  
+  <Accordion title="Use version control">
+    Commit your changes to git so you can revert if something breaks:
+    
+    ```bash
+    git add .
+    git commit -m "Customize keymaps and colorscheme"
+    ```
+  </Accordion>
+  
+  <Accordion title="Check plugin documentation">
+    When customizing plugin behavior, refer to the plugin's official documentation for all available options.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Adding Plugins" icon="plug" href="/guides/adding-plugins">
+    Learn how to add new plugins to nvim-luffy
+  </Card>
+  <Card title="LSP Setup" icon="code" href="/guides/lsp-setup">
+    Configure language servers and formatters
+  </Card>
+</CardGroup>

@@ -1,0 +1,396 @@
+---
+title: 'nvim-tree Configuration'
+description: 'Complete reference for nvim-tree file explorer configuration'
+---
+
+## Overview
+
+nvim-tree is the file explorer for nvim-luffy, providing a tree-style file browser with custom keybindings optimized for efficient navigation.
+
+**Location:** `lua/leyland/plugins/nvim-tree.lua`
+
+---
+
+## Plugin Specification
+
+```lua
+return {
+  "nvim-tree/nvim-tree.lua",
+  dependencies = "nvim-tree/nvim-web-devicons",
+  keys = {
+    { "<leader>e", "<cmd>NvimTreeFindFileToggle<cr>", desc = "Toggle file explorer" },
+  },
+}
+```
+
+### Lazy Loading
+
+The plugin is lazy-loaded on `<leader>e` keypress.
+
+---
+
+## Toggle Keymap
+
+| Key | Command | Description |
+|-----|---------|-------------|
+| `<leader>e` | `:NvimTreeFindFileToggle` | Toggle file explorer and reveal current file |
+
+---
+
+## Configuration
+
+### View Settings
+
+```lua
+nvimtree.setup({
+  view = {
+    width = 50,
+    relativenumber = true,
+    side = "right",
+  },
+})
+```
+
+<ParamField path="view.width" type="number" default="50">
+  Width of the file explorer window in columns
+</ParamField>
+
+<ParamField path="view.relativenumber" type="boolean" default="true">
+  Shows relative line numbers in the tree
+</ParamField>
+
+<ParamField path="view.side" type="string" default="right">
+  Opens file explorer on the right side (instead of default left)
+</ParamField>
+
+---
+
+## Custom Keybindings
+
+nvim-tree includes custom keymaps for more intuitive navigation:
+
+```lua
+local function on_attach(bufnr)
+  -- Default mappings
+  api.config.mappings.default_on_attach(bufnr)
+  
+  -- Custom mappings
+  vim.keymap.set("n", "l", api.node.open.edit, opts("Open"))
+  vim.keymap.set("n", "h", api.node.navigate.parent_close, opts("Close Directory"))
+end
+```
+
+### Tree Navigation Keymaps
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `l` | Open | Open file or expand directory |
+| `h` | Close | Close directory and navigate to parent |
+
+**Note:** These override the default `<CR>` and `-` keybindings for a more vim-like experience with hjkl navigation.
+
+### Default Keymaps
+
+All default nvim-tree keymaps are still available. Press `g?` in the tree to see all keybindings.
+
+Common defaults:
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<CR>` | Open | Open file (also works in addition to `l`) |
+| `o` | Open | Open file |
+| `<C-v>` | VSplit | Open file in vertical split |
+| `<C-x>` | Split | Open file in horizontal split |
+| `<C-t>` | Tabnew | Open file in new tab |
+| `a` | Create | Create new file or directory |
+| `d` | Delete | Delete file or directory |
+| `r` | Rename | Rename file or directory |
+| `x` | Cut | Cut file or directory |
+| `c` | Copy | Copy file or directory |
+| `p` | Paste | Paste file or directory |
+| `y` | Copy Name | Copy filename |
+| `Y` | Copy Path | Copy relative path |
+| `gy` | Copy Absolute Path | Copy absolute path |
+| `R` | Refresh | Refresh tree |
+| `q` | Close | Close tree |
+| `g?` | Help | Show help with all keybindings |
+
+---
+
+## Renderer Configuration
+
+### Indent Markers
+
+```lua
+renderer = {
+  indent_markers = {
+    enable = true,
+  },
+}
+```
+
+<ParamField path="renderer.indent_markers.enable" type="boolean" default="true">
+  Shows indent guide lines in the tree for better visual structure
+</ParamField>
+
+### Folder Icons
+
+```lua
+renderer = {
+  icons = {
+    glyphs = {
+      folder = {
+        arrow_closed = "",
+        arrow_open = "",
+      },
+    },
+  },
+}
+```
+
+<ParamField path="renderer.icons.glyphs.folder.arrow_closed" type="string" default="">
+  Icon for collapsed folders
+</ParamField>
+
+<ParamField path="renderer.icons.glyphs.folder.arrow_open" type="string" default="">
+  Icon for expanded folders
+</ParamField>
+
+---
+
+## Actions Configuration
+
+### Window Picker
+
+```lua
+actions = {
+  open_file = {
+    window_picker = {
+      enable = false,
+    },
+  },
+}
+```
+
+<ParamField path="actions.open_file.window_picker.enable" type="boolean" default="false">
+  Disables window picker when opening files - always opens in the last accessed window
+</ParamField>
+
+---
+
+## Filters Configuration
+
+```lua
+filters = {
+  custom = { ".DS_Store" },
+}
+```
+
+<ParamField path="filters.custom" type="table" default='{ ".DS_Store" }'>
+  Hides `.DS_Store` files (macOS system files) from the tree
+</ParamField>
+
+---
+
+## Git Integration
+
+```lua
+git = {
+  ignore = false,
+}
+```
+
+<ParamField path="git.ignore" type="boolean" default="false">
+  Shows files ignored by git (grayed out) instead of hiding them
+</ParamField>
+
+---
+
+## Initialization
+
+```lua
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+```
+
+Disables netrw (Neovim's built-in file explorer) to prevent conflicts.
+
+---
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `:NvimTreeToggle` | Toggle tree visibility |
+| `:NvimTreeOpen` | Open tree |
+| `:NvimTreeClose` | Close tree |
+| `:NvimTreeFocus` | Focus tree window |
+| `:NvimTreeFindFile` | Find and reveal current file in tree |
+| `:NvimTreeFindFileToggle` | Toggle tree and reveal current file |
+| `:NvimTreeRefresh` | Refresh tree |
+| `:NvimTreeResize <width>` | Resize tree window |
+| `:NvimTreeCollapse` | Collapse all folders |
+| `:NvimTreeCollapseKeepBuffers` | Collapse all except open buffers |
+
+---
+
+## API Reference
+
+### Open Tree Programmatically
+
+```lua
+local api = require("nvim-tree.api")
+
+-- Open tree
+api.tree.open()
+
+-- Toggle tree
+api.tree.toggle()
+
+-- Find and reveal file
+api.tree.find_file()
+```
+
+### Node Operations
+
+```lua
+local api = require("nvim-tree.api")
+
+-- Open node
+api.node.open.edit()
+
+-- Navigate to parent
+api.node.navigate.parent()
+
+-- Navigate to parent and close
+api.node.navigate.parent_close()
+```
+
+---
+
+## Customization Examples
+
+### Change Tree Side
+
+```lua
+view = {
+  side = "left",  -- Open on left instead of right
+}
+```
+
+### Change Width
+
+```lua
+view = {
+  width = 35,  -- Narrower tree
+}
+```
+
+### Dynamic Width
+
+```lua
+view = {
+  width = {
+    min = 30,
+    max = 50,
+  },
+}
+```
+
+### Show Hidden Files
+
+```lua
+filters = {
+  dotfiles = false,  -- Show dotfiles
+}
+```
+
+### Hide Git Ignored Files
+
+```lua
+git = {
+  ignore = true,  -- Hide git ignored files
+}
+```
+
+### Disable Relativenumber
+
+```lua
+view = {
+  relativenumber = false,
+  number = true,  -- Use absolute numbers
+}
+```
+
+### Custom Filters
+
+```lua
+filters = {
+  custom = {
+    ".DS_Store",
+    "node_modules",
+    ".git",
+    ".cache",
+  },
+}
+```
+
+### Auto Close on File Open
+
+```lua
+actions = {
+  open_file = {
+    quit_on_open = true,
+  },
+}
+```
+
+### Follow Current File
+
+```lua
+update_focused_file = {
+  enable = true,
+  update_root = false,
+}
+```
+
+---
+
+## Tips
+
+1. **Quick Navigation:** Use `h` and `l` to quickly navigate directories with vim motions
+2. **File Creation:** Press `a` and add `/` at the end to create a directory: `new-dir/`
+3. **Multiple Selection:** Use `<Tab>` to mark multiple files, then operate on them
+4. **Search:** Press `/` to search for files by name
+5. **Help:** Press `g?` to see all available keybindings
+
+---
+
+## File Operations
+
+### Creating Files and Directories
+
+1. Press `a` (add)
+2. Type filename
+3. For directory, add trailing `/`: `new-dir/`
+4. Press `<CR>`
+
+### Renaming
+
+1. Navigate to file
+2. Press `r` (rename)
+3. Edit name
+4. Press `<CR>`
+
+### Deleting
+
+1. Navigate to file
+2. Press `d` (delete)
+3. Confirm deletion
+
+### Copying and Moving
+
+1. Navigate to file
+2. Press `c` (copy) or `x` (cut)
+3. Navigate to destination
+4. Press `p` (paste)

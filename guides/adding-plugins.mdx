@@ -1,0 +1,419 @@
+---
+title: Adding Plugins
+description: Learn how to add and configure new plugins in nvim-luffy
+---
+
+## Overview
+
+nvim-luffy uses [lazy.nvim](https://github.com/folke/lazy.nvim) as its plugin manager. Lazy.nvim is a modern, fast plugin manager that supports lazy-loading and automatic installation.
+
+## How lazy.nvim Works
+
+The plugin manager is initialized in `lua/leyland/lazy.lua`:
+
+```lua
+require("lazy").setup({
+  { import = "leyland.plugins" },
+  { import = "leyland.plugins.lsp" }
+}, {
+  checker = {
+    enabled = true,
+    notify = false,
+  },
+  change_detection = {
+    notify = false,
+  },
+})
+```
+
+### Key Features
+
+- **Automatic Installation**: Plugins are installed automatically when Neovim starts
+- **Lazy Loading**: Plugins can load on demand (events, commands, filetypes)
+- **Update Checker**: Automatically checks for plugin updates
+- **Plugin Imports**: Loads plugins from `lua/leyland/plugins/` and `lua/leyland/plugins/lsp/`
+
+## Where to Add New Plugins
+
+You have several options for adding plugins:
+
+<Tabs>
+  <Tab title="Create a new file">
+    Create a new file in `lua/leyland/plugins/` for organization:
+    
+    ```lua
+    -- lua/leyland/plugins/my-plugin.lua
+    return {
+      "author/plugin-name",
+      config = function()
+        -- Configuration here
+      end,
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Add to existing file">
+    Add to `lua/leyland/plugins/init.lua` for simple plugins:
+    
+    ```lua
+    return {
+      "nvim-lua/plenary.nvim",
+      "christoomey/vim-tmux-navigator",
+      "author/new-plugin",  -- Your new plugin
+    }
+    ```
+  </Tab>
+  
+  <Tab title="LSP-related plugins">
+    For LSP-related plugins, add to `lua/leyland/plugins/lsp/`:
+    
+    ```lua
+    -- lua/leyland/plugins/lsp/my-lsp-plugin.lua
+    return {
+      "author/lsp-plugin",
+      dependencies = { "neovim/nvim-lspconfig" },
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Plugin Configuration Structure
+
+Every plugin spec is a Lua table with specific fields:
+
+```lua
+return {
+  -- Required: GitHub repo (author/repo-name)
+  "author/plugin-name",
+  
+  -- Optional: Lazy loading
+  event = "VeryLazy",        -- Load on VeryLazy event
+  cmd = "CommandName",        -- Load when command is run
+  keys = "<leader>key",       -- Load when key is pressed
+  ft = "lua",                 -- Load for specific filetype
+  lazy = false,               -- Load immediately (default: true)
+  
+  -- Optional: Dependencies
+  dependencies = {
+    "required/plugin",
+  },
+  
+  -- Optional: Load priority (higher = earlier)
+  priority = 1000,
+  
+  -- Optional: Plugin options (passed to setup())
+  opts = {
+    option1 = true,
+    option2 = "value",
+  },
+  
+  -- Optional: Configuration function
+  config = function()
+    require("plugin-name").setup({
+      -- Configuration here
+    })
+  end,
+}
+```
+
+<Note>
+If you provide `opts`, lazy.nvim automatically calls `require("plugin-name").setup(opts)`. Use `config` for more complex setup logic.
+</Note>
+
+## Adding a New Plugin: Step-by-Step
+
+Let's add [which-key.nvim](https://github.com/folke/which-key.nvim) as an example.
+
+<Steps>
+  <Step title="Create the plugin file">
+    Create `lua/leyland/plugins/which-key.lua`:
+    
+    ```lua
+    return {
+      "folke/which-key.nvim",
+      event = "VeryLazy",
+    }
+    ```
+  </Step>
+  
+  <Step title="Add configuration">
+    Add plugin-specific configuration:
+    
+    ```lua
+    return {
+      "folke/which-key.nvim",
+      event = "VeryLazy",
+      opts = {
+        plugins = {
+          spelling = {
+            enabled = true,
+          },
+        },
+        window = {
+          border = "single",
+        },
+      },
+    }
+    ```
+  </Step>
+  
+  <Step title="Add keybindings (if needed)">
+    Set up keybindings in the config function:
+    
+    ```lua
+    return {
+      "folke/which-key.nvim",
+      event = "VeryLazy",
+      config = function()
+        local wk = require("which-key")
+        
+        wk.setup({
+          window = {
+            border = "single",
+          },
+        })
+        
+        -- Register key groups
+        wk.register({
+          ["<leader>f"] = { name = "Find" },
+          ["<leader>b"] = { name = "Buffer" },
+          ["<leader>g"] = { name = "Git" },
+        })
+      end,
+    }
+    ```
+  </Step>
+  
+  <Step title="Install the plugin">
+    Restart Neovim or run:
+    
+    ```vim
+    :Lazy sync
+    ```
+    
+    This will install and load the new plugin.
+  </Step>
+  
+  <Step title="Verify installation">
+    Check that the plugin is loaded:
+    
+    ```vim
+    :Lazy
+    ```
+    
+    Look for your plugin in the list. It should show as installed and loaded.
+  </Step>
+</Steps>
+
+## Real Examples from nvim-luffy
+
+### Example 1: Simple Plugin (no configuration)
+
+```lua
+-- lua/leyland/plugins/init.lua
+return {
+  "nvim-lua/plenary.nvim",        -- Lua utility functions
+  "christoomey/vim-tmux-navigator",  -- Tmux integration
+}
+```
+
+### Example 2: Plugin with Dependencies
+
+```lua
+-- lua/leyland/plugins/colorscheme.lua
+return {
+  {
+    "catppuccin/nvim",
+    name = "catppuccin",
+    priority = 1000,  -- Load early
+  },
+  {
+    "rose-pine/neovim",
+    name = "rose-pine",
+    priority = 1000,
+    config = function()
+      vim.cmd.colorscheme("bamboo")
+    end,
+  },
+}
+```
+
+### Example 3: Plugin with opts
+
+```lua
+-- From lua/leyland/plugins/lsp/mason.lua
+return {
+  {
+    "williamboman/mason-lspconfig.nvim",
+    opts = {
+      ensure_installed = {
+        "ts_ls",
+        "lua_ls",
+        "pyright",
+      },
+    },
+    dependencies = {
+      "williamboman/mason.nvim",
+      "neovim/nvim-lspconfig",
+    },
+  },
+}
+```
+
+### Example 4: Plugin with Complex Config
+
+```lua
+-- lua/leyland/plugins/alpha.lua (simplified)
+return {
+  "goolord/alpha-nvim",
+  event = "VimEnter",
+  config = function()
+    local alpha = require("alpha")
+    local dashboard = require("alpha.themes.dashboard")
+    
+    dashboard.section.header.val = {
+      "  ASCII art here",
+    }
+    
+    dashboard.section.buttons.val = {
+      dashboard.button("f", "  Find file", ":Telescope find_files <CR>"),
+      dashboard.button("q", "  Quit", ":qa<CR>"),
+    }
+    
+    alpha.setup(dashboard.opts)
+  end,
+}
+```
+
+## Lazy Loading Strategies
+
+Lazy loading improves startup time by deferring plugin loading.
+
+<AccordionGroup>
+  <Accordion title="Load on event">
+    Load when specific Neovim events occur:
+    
+    ```lua
+    {
+      "plugin/name",
+      event = "BufReadPre",  -- Load before reading a buffer
+    }
+    ```
+    
+    Common events:
+    - `VimEnter` - After Neovim starts
+    - `VeryLazy` - After Neovim is idle
+    - `BufReadPre` - Before reading a file
+    - `InsertEnter` - When entering insert mode
+  </Accordion>
+  
+  <Accordion title="Load on command">
+    Load when a specific command is executed:
+    
+    ```lua
+    {
+      "plugin/name",
+      cmd = { "CommandOne", "CommandTwo" },
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Load on keypress">
+    Load when specific keys are pressed:
+    
+    ```lua
+    {
+      "plugin/name",
+      keys = {
+        { "<leader>f", "<cmd>Command<cr>", desc = "Description" },
+      },
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Load for filetype">
+    Load only for specific file types:
+    
+    ```lua
+    {
+      "plugin/name",
+      ft = { "lua", "python", "javascript" },
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Load immediately">
+    Force immediate loading (use sparingly):
+    
+    ```lua
+    {
+      "plugin/name",
+      lazy = false,
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Managing Plugins
+
+### Useful lazy.nvim Commands
+
+```vim
+:Lazy              " Open lazy.nvim UI
+:Lazy sync         " Install missing plugins and update
+:Lazy update       " Update all plugins
+:Lazy clean        " Remove unused plugins
+:Lazy check        " Check for updates
+:Lazy log          " View recent updates
+:Lazy profile      " View startup profiling
+```
+
+### Removing a Plugin
+
+<Steps>
+  <Step title="Remove the plugin spec">
+    Delete or comment out the plugin definition in your config.
+  </Step>
+  
+  <Step title="Clean up">
+    Run `:Lazy clean` to remove the plugin files.
+  </Step>
+  
+  <Step title="Restart Neovim">
+    Restart to ensure all references are cleared.
+  </Step>
+</Steps>
+
+## Troubleshooting Plugin Installation
+
+<AccordionGroup>
+  <Accordion title="Plugin not loading">
+    - Check that the GitHub repo path is correct
+    - Verify lazy loading conditions are met
+    - Run `:Lazy` to see plugin status and errors
+    - Check `:messages` for error messages
+  </Accordion>
+  
+  <Accordion title="Configuration not applying">
+    - Ensure `config` function is being called (check with print statements)
+    - Verify `opts` table structure matches plugin's expected format
+    - Check plugin documentation for correct option names
+  </Accordion>
+  
+  <Accordion title="Dependency errors">
+    - Ensure all dependencies are listed in the `dependencies` table
+    - Run `:Lazy sync` to install missing dependencies
+    - Check dependency load order with `:Lazy profile`
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="LSP Setup" icon="code" href="/guides/lsp-setup">
+    Configure language servers and tools
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/guides/troubleshooting">
+    Common issues and solutions
+  </Card>
+</CardGroup>

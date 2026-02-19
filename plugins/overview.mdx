@@ -1,0 +1,257 @@
+---
+title: 'Plugin System Overview'
+description: 'Understanding nvim-luffy plugin management with lazy.nvim'
+---
+
+## Plugin Manager
+
+nvim-luffy uses [lazy.nvim](https://github.com/folke/lazy.nvim) for efficient plugin management. It provides lazy-loading capabilities, automatic dependency resolution, and a clean plugin configuration structure.
+
+### Setup
+
+The plugin manager is configured in `lua/leyland/lazy.lua:1-22`:
+
+```lua
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable",
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
+
+require("lazy").setup(
+  { 
+    { import = "leyland.plugins" }, 
+    { import = "leyland.plugins.lsp" } 
+  },
+  {
+    checker = {
+      enabled = true,
+      notify = false,
+    },
+    change_detection = {
+      notify = false,
+    },
+  }
+)
+```
+
+### Plugin Organization
+
+Plugins are organized into the following directories:
+
+- **`lua/leyland/plugins/`** - Main plugin configurations
+- **`lua/leyland/plugins/lsp/`** - LSP-specific plugins (mason, lspconfig)
+
+### Plugin Categories
+
+<CardGroup cols={2}>
+  <Card title="Editor" icon="pen-to-square" href="/plugins/editor">
+    Syntax highlighting, formatting, autopairs, and navigation
+  </Card>
+  
+  <Card title="UI" icon="palette" href="/plugins/ui">
+    Dashboard, colorschemes, and interface enhancements
+  </Card>
+  
+  <Card title="LSP" icon="code" href="/plugins/lsp">
+    Language servers, completions, and diagnostics
+  </Card>
+  
+  <Card title="Git" icon="git-alt" href="/plugins/git">
+    Git integration with Neogit and Diffview
+  </Card>
+  
+  <Card title="Navigation" icon="compass" href="/plugins/navigation">
+    Telescope, Harpoon, and file tree navigation
+  </Card>
+</CardGroup>
+
+## Installed Plugins
+
+All plugins are locked to specific versions in `lazy-lock.json` for reproducibility.
+
+### Core Plugins
+
+<CardGroup cols={2}>
+  <Card title="lazy.nvim" icon="plug">
+    Plugin manager with lazy loading
+  </Card>
+  
+  <Card title="plenary.nvim" icon="puzzle-piece">
+    Lua utility functions used by many plugins
+  </Card>
+</CardGroup>
+
+### Editor Enhancement
+
+<CardGroup cols={2}>
+  <Card title="nvim-treesitter" icon="tree">
+    Advanced syntax highlighting and code understanding
+  </Card>
+  
+  <Card title="nvim-autopairs" icon="brackets-curly">
+    Automatic bracket and quote pairing
+  </Card>
+  
+  <Card title="flash.nvim" icon="bolt">
+    Fast navigation with highlighted jumps
+  </Card>
+  
+  <Card title="conform.nvim" icon="wand-magic-sparkles">
+    Code formatting with support for multiple formatters
+  </Card>
+</CardGroup>
+
+### UI & Appearance
+
+<CardGroup cols={2}>
+  <Card title="alpha-nvim" icon="door-open">
+    Customizable dashboard with One Piece ASCII art
+  </Card>
+  
+  <Card title="snacks.nvim" icon="candy">
+    Smooth scrolling and UI enhancements
+  </Card>
+  
+  <Card title="nvim-web-devicons" icon="icons">
+    File type icons throughout the UI
+  </Card>
+</CardGroup>
+
+### Colorschemes
+
+<CardGroup cols={3}>
+  <Card title="catppuccin" icon="mug-saucer">
+    Soothing pastel theme
+  </Card>
+  
+  <Card title="tokyonight.nvim" icon="moon">
+    Clean, dark theme
+  </Card>
+  
+  <Card title="bamboo.nvim" icon="leaf">
+    Default theme - warm and comfortable
+  </Card>
+  
+  <Card title="rose-pine" icon="rose">
+    Low-contrast theme
+  </Card>
+  
+  <Card title="modus-themes" icon="circle-half-stroke">
+    Highly accessible themes
+  </Card>
+  
+  <Card title="onedark.nvim" icon="circle">
+    Atom-inspired theme
+  </Card>
+</CardGroup>
+
+### LSP & Completion
+
+<CardGroup cols={2}>
+  <Card title="mason.nvim" icon="hammer">
+    LSP server installer and manager
+  </Card>
+  
+  <Card title="nvim-lspconfig" icon="gear">
+    LSP configuration framework
+  </Card>
+  
+  <Card title="nvim-cmp" icon="keyboard">
+    Autocompletion engine
+  </Card>
+  
+  <Card title="LuaSnip" icon="scissors">
+    Snippet engine
+  </Card>
+  
+  <Card title="lspkind.nvim" icon="icons">
+    VS Code-like pictograms for completion
+  </Card>
+  
+  <Card title="lazydev.nvim" icon="laptop-code">
+    Lua development enhancements
+  </Card>
+</CardGroup>
+
+### Git Integration
+
+<CardGroup cols={2}>
+  <Card title="neogit" icon="git">
+    Magit-like git interface
+  </Card>
+  
+  <Card title="diffview.nvim" icon="code-compare">
+    Advanced diff and merge tool
+  </Card>
+</CardGroup>
+
+### Navigation
+
+<CardGroup cols={2}>
+  <Card title="telescope.nvim" icon="magnifying-glass">
+    Fuzzy finder for files, text, and more
+  </Card>
+  
+  <Card title="harpoon" icon="bookmark">
+    Quick file bookmarking and switching
+  </Card>
+  
+  <Card title="nvim-tree.lua" icon="folder-tree">
+    File explorer sidebar
+  </Card>
+  
+  <Card title="vim-tmux-navigator" icon="window-restore">
+    Seamless vim-tmux split navigation
+  </Card>
+</CardGroup>
+
+### Utilities
+
+<CardGroup cols={2}>
+  <Card title="trouble.nvim" icon="triangle-exclamation">
+    Beautiful diagnostics list
+  </Card>
+  
+  <Card title="todo-comments.nvim" icon="list-check">
+    Highlight and search TODO comments
+  </Card>
+  
+  <Card title="nvim-lsp-file-operations" icon="file">
+    LSP file operation support
+  </Card>
+</CardGroup>
+
+### Pickers
+
+<CardGroup cols={2}>
+  <Card title="telescope-fzf-native.nvim" icon="bolt">
+    Native FZF sorting for Telescope
+  </Card>
+  
+  <Card title="fzf-lua" icon="filter">
+    Fast FZF integration
+  </Card>
+  
+  <Card title="mini.pick" icon="hand-pointer">
+    Minimalist picker interface
+  </Card>
+</CardGroup>
+
+## Plugin Loading
+
+lazy.nvim automatically handles plugin loading based on:
+
+- **Event triggers** - Load when specific Neovim events occur
+- **File types** - Load only for specific file types
+- **Commands** - Load when a command is first used
+- **Key mappings** - Load when a keymap is triggered
+
+This ensures fast startup times while maintaining full functionality.

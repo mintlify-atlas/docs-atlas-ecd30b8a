@@ -1,80 +1,170 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: 'Quickstart'
+description: 'Get up and running with nvim-luffy in minutes'
+icon: 'rocket'
 ---
 
-## Get started in three steps
+## First Launch
 
-Get your documentation site running locally and make your first customization.
+When you first launch nvim-luffy, lazy.nvim will automatically install all plugins. This process happens automatically and takes about 30-60 seconds depending on your internet connection.
 
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+<Steps>
+  <Step title="Launch Neovim">
+    Open your terminal and run:
+    ```bash
+    nvim
+    ```
+  </Step>
+  
+  <Step title="Wait for Plugin Installation">
+    Lazy.nvim will automatically download and install all plugins. You'll see a progress window showing the installation status.
+  </Step>
+  
+  <Step title="Restart Neovim">
+    Once installation completes, restart Neovim to ensure all plugins are loaded correctly:
+    ```bash
+    :q
+    nvim
+    ```
+  </Step>
+</Steps>
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+The leader key is set to **Space** - you'll use it for most keybindings throughout nvim-luffy.
 </Note>
+
+## Essential Keybindings
+
+Here are the most important keybindings to get you started. All commands use `Space` as the leader key.
+
+### Finding Files with Telescope
+
+Telescope is your primary tool for navigating files and searching content.
+
+| Keybinding | Action | Description |
+|------------|--------|-------------|
+| `<leader><leader>` | Find Files | Fuzzy find files in current directory |
+| `<leader>/` | Live Grep | Search for text across all files |
+| `<leader>fr` | Recent Files | Browse recently opened files |
+| `<leader>fc` | Find String Under Cursor | Search for the word under your cursor |
+| `<leader>ft` | Find TODOs | List all TODO comments in your project |
+| `<leader>fk` | Find Keymaps | Search all available keybindings |
+
+<Tip>
+Within Telescope, use `Ctrl+k` and `Ctrl+j` to move between results, and `Ctrl+q` to send selected items to the quickfix list.
+</Tip>
+
+### Quick Navigation with Harpoon
+
+Harpoon lets you mark files and jump between them instantly - perfect for working with multiple files.
+
+| Keybinding | Action | Reference |
+|------------|--------|-----------|
+| `<leader>H` | Add File | Mark current file in Harpoon |
+| `<leader>h` | Quick Menu | Open Harpoon file menu |
+| `<leader>1` to `<leader>9` | Jump to File | Jump directly to marked file 1-9 |
+
+<Tip>
+Mark your most-used files with `<leader>H`, then jump between them instantly with `<leader>1`, `<leader>2`, etc.
+</Tip>
+
+### File Explorer
+
+| Keybinding | Action |
+|------------|--------|
+| `<leader>e` | Toggle nvim-tree file explorer |
+
+Inside nvim-tree:
+- `l` - Open file or expand directory
+- `h` - Close directory
+- Arrow keys or `j`/`k` - Navigate up/down
+
+### Window & Buffer Management
+
+| Keybinding | Action | Reference |
+|------------|--------|-----------|
+| `<leader>\|` | Split Vertically | Split current window vertically |
+| `<leader>sh` | Split Horizontally | Split current window horizontally |
+| `<leader>bd` | Close Buffer | Close current buffer |
+| `<leader>ba` | Close All Buffers | Close all open buffers |
+
+### Autocompletion
+
+While in Insert mode, nvim-cmp provides intelligent autocompletion:
+
+| Keybinding | Action |
+|------------|--------|
+| `Ctrl+Space` | Trigger completion menu |
+| `Ctrl+k` | Select previous suggestion |
+| `Ctrl+j` | Select next suggestion |
+| `Ctrl+e` | Close completion menu |
+| `Enter` | Confirm selection |
+| `Tab` | Select next item or expand snippet |
+
+## Your First Workflow
+
+Let's put it all together with a practical example:
+
+<Steps>
+  <Step title="Open Your Project">
+    Navigate to your project directory and launch nvim:
+    ```bash
+    cd ~/my-project
+    nvim
+    ```
+  </Step>
+  
+  <Step title="Find a File">
+    Press `Space` then `Space` again to open Telescope file finder. Start typing the filename and press `Enter` to open it.
+  </Step>
+  
+  <Step title="Mark Important Files">
+    Open 2-3 files you'll work with frequently. For each one, press `Space+Shift+H` to mark it with Harpoon.
+  </Step>
+  
+  <Step title="Jump Between Files">
+    Now press `Space+1` to jump to your first marked file, `Space+2` for the second, etc. No more fuzzy finding!
+  </Step>
+  
+  <Step title="Search Your Codebase">
+    Press `Space+/` to search for text across all files. Try searching for a function name or variable.
+  </Step>
+  
+  <Step title="Open File Explorer">
+    Press `Space+e` to toggle the file tree. Use `h` and `l` to collapse/expand directories, and navigate with `j`/`k`.
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Full Keymap Reference" icon="keyboard" href="/configuration/keymaps">
+    Browse all available keybindings and customize them
+  </Card>
+  
+  <Card title="LSP Configuration" icon="code" href="/reference/lsp">
+    Set up language servers for your programming languages
+  </Card>
+  
+  <Card title="Plugin Guide" icon="puzzle-piece" href="/plugins/overview">
+    Learn about all included plugins and their features
+  </Card>
+  
+  <Card title="Customization" icon="palette" href="/configuration/overview">
+    Make nvim-luffy your own with custom settings
+  </Card>
+</CardGroup>
+
+## Pro Tips
+
+<Tip>
+Press `Space+fk` to search all available keybindings - this is the fastest way to discover new features!
+</Tip>
+
+<Tip>
+Use `Space+ft` to find all TODO, FIXME, and NOTE comments in your project. Great for tracking work items!
+</Tip>
+
+<Tip>
+The configuration uses relative line numbers by default. This makes it easy to use motion commands like `10j` to jump 10 lines down.
+</Tip>

@@ -1,0 +1,286 @@
+---
+title: 'Core Module'
+description: 'Complete reference for nvim-luffy core module'
+---
+
+## Overview
+
+The core module (`lua/leyland/core/`) contains the fundamental configuration for nvim-luffy, including options, keymaps, and autocommands. It is automatically loaded at startup.
+
+## Module Structure
+
+### Core Initialization
+
+**Location:** `lua/leyland/core/init.lua`
+
+The core module loads three sub-modules in sequence:
+
+```lua
+require("leyland.core.options")
+require("leyland.core.keymaps")
+require("leyland.core.autocommands")
+```
+
+---
+
+## Options Module
+
+**Location:** `lua/leyland/core/options.lua`
+
+Configures Neovim's built-in options using `vim.opt`.
+
+### Display Settings
+
+<ParamField path="relativenumber" type="boolean" default="true">
+  Enables relative line numbers for easier motion commands
+</ParamField>
+
+<ParamField path="number" type="boolean" default="true">
+  Shows absolute line number on current line
+</ParamField>
+
+<ParamField path="cmdheight" type="number" default="0">
+  Hides the command line when not in use
+</ParamField>
+
+<ParamField path="laststatus" type="number" default="0">
+  Hides the statusline completely
+</ParamField>
+
+<ParamField path="winbar" type="string" default="%f %h%m%r%=%l,%c %P">
+  Displays file info, modified flag, and position in window bar
+  - `%f` - filename
+  - `%h` - help buffer flag
+  - `%m` - modified flag
+  - `%r` - readonly flag
+  - `%l,%c` - line and column number
+  - `%P` - percentage through file
+</ParamField>
+
+<ParamField path="wrap" type="boolean" default="false">
+  Disables line wrapping
+</ParamField>
+
+<ParamField path="signcolumn" type="string" default="yes">
+  Always shows sign column to prevent text shifting
+</ParamField>
+
+### Indentation Settings
+
+<ParamField path="tabstop" type="number" default="2">
+  Number of spaces a tab character represents
+</ParamField>
+
+<ParamField path="shiftwidth" type="number" default="2">
+  Number of spaces used for each indentation level
+</ParamField>
+
+<ParamField path="expandtab" type="boolean" default="true">
+  Converts tabs to spaces
+</ParamField>
+
+<ParamField path="autoindent" type="boolean" default="true">
+  Copies indent from current line when starting new line
+</ParamField>
+
+### Search Settings
+
+<ParamField path="ignorecase" type="boolean" default="true">
+  Makes search case-insensitive by default
+</ParamField>
+
+<ParamField path="smartcase" type="boolean" default="true">
+  Uses case-sensitive search when pattern contains uppercase letters
+</ParamField>
+
+### File Management
+
+<ParamField path="swapfile" type="boolean" default="false">
+  Disables swap file creation
+</ParamField>
+
+<ParamField path="backspace" type="string" default="indent,eol,start">
+  Allows backspace over indentation, line breaks, and insertion start point
+</ParamField>
+
+### Clipboard
+
+<ParamField path="clipboard" type="string" default="unnamedplus">
+  Uses system clipboard as default register for yank/paste operations
+</ParamField>
+
+### Window Splitting
+
+<ParamField path="splitright" type="boolean" default="true">
+  Opens vertical splits to the right
+</ParamField>
+
+<ParamField path="splitbelow" type="boolean" default="true">
+  Opens horizontal splits below
+</ParamField>
+
+### Appearance
+
+<ParamField path="background" type="string" default="dark">
+  Sets dark background mode for colorschemes
+</ParamField>
+
+### LSP Configuration
+
+```lua
+vim.lsp.set_log_level("error") -- Only show errors, not warnings
+```
+
+Sets LSP log level to show only errors, reducing noise from warnings.
+
+### Netrw Configuration
+
+```lua
+vim.cmd("let g:netrw_liststyle = 3")
+```
+
+Sets netrw to tree-style listing (style 3).
+
+---
+
+## Keymaps Module
+
+**Location:** `lua/leyland/core/keymaps.lua`
+
+Defines core keybindings. Leader key is set to Space.
+
+### Leader Key
+
+```lua
+vim.g.mapleader = " "
+```
+
+### Window Management Keymaps
+
+| Key | Mode | Action | Description |
+|-----|------|--------|-------------|
+| `<leader>\|` | Normal | `<C-w>v` | Split window vertically |
+| `<leader>sh` | Normal | `<C-w>s` | Split window horizontally |
+
+### Buffer Management Keymaps
+
+| Key | Mode | Action | Description |
+|-----|------|--------|-------------|
+| `<leader>bd` | Normal | `:bd` | Close current buffer |
+| `<leader>ba` | Normal | `:%bd` | Close all buffers |
+
+### Notes
+
+The file contains commented-out keymaps that are disabled by default:
+- `jk` in insert mode to escape
+- `<leader>nh` to clear search highlights (handled automatically by autocommand)
+
+---
+
+## Autocommands Module
+
+**Location:** `lua/leyland/core/autocommands.lua`
+
+Defines automatic commands that execute on specific events.
+
+### Highlight on Yank
+
+```lua
+vim.api.nvim_create_autocmd("TextYankPost", {
+  group = augroup("highlight_yank"),
+  callback = function()
+    (vim.hl or vim.highlight).on_yank()
+  end,
+})
+```
+
+**Event:** `TextYankPost`
+
+**Description:** Briefly highlights yanked text to provide visual feedback.
+
+### Auto Clear Search Highlights
+
+```lua
+vim.api.nvim_create_autocmd("CursorMoved", {
+  group = vim.api.nvim_create_augroup("auto-hlsearch", { clear = true }),
+  callback = function()
+    if vim.v.hlsearch == 1 and vim.fn.searchcount().exact_match == 0 then
+      vim.schedule(function()
+        vim.cmd.nohlsearch()
+      end)
+    end
+  end,
+})
+```
+
+**Event:** `CursorMoved`
+
+**Description:** Automatically clears search highlights when cursor moves away from search matches. Removes the need for manual `:nohl` commands.
+
+### Helper Function
+
+```lua
+local function augroup(name)
+  return vim.api.nvim_create_augroup("lazyvim_" .. name, { clear = true })
+end
+```
+
+Creates autocommand groups with consistent naming convention.
+
+---
+
+## API Reference
+
+### Accessing Core Modules
+
+```lua
+-- Core modules are automatically loaded
+-- No explicit require needed in your config
+
+-- To override options after core loads:
+vim.opt.relativenumber = false
+
+-- To add additional keymaps:
+vim.keymap.set("n", "<leader>custom", ":echo 'custom'<CR>", { desc = "Custom keymap" })
+
+-- To add additional autocommands:
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.lua",
+  callback = function()
+    -- Your callback
+  end,
+})
+```
+
+### Customization
+
+To customize core settings, create or modify files in your config:
+
+1. **Override options:** Add settings to `~/.config/nvim/init.lua` after nvim-luffy loads
+2. **Add keymaps:** Use `vim.keymap.set()` in your init file
+3. **Add autocommands:** Use `vim.api.nvim_create_autocmd()` in your init file
+
+---
+
+## Example Configuration Override
+
+```lua
+-- In your init.lua after requiring nvim-luffy
+
+-- Override core options
+vim.opt.wrap = true  -- Enable line wrap
+vim.opt.cmdheight = 1  -- Show command line
+
+-- Add custom keymaps
+vim.keymap.set("n", "<leader>w", ":w<CR>", { desc = "Save file" })
+vim.keymap.set("n", "<leader>q", ":q<CR>", { desc = "Quit" })
+
+-- Add custom autocommand
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.lua",
+  callback = function()
+    vim.lsp.buf.format()
+  end,
+  desc = "Format Lua files on save",
+})
+```

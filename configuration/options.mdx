@@ -1,0 +1,187 @@
+---
+title: Editor Options
+description: Complete reference for nvim-luffy's editor options and settings
+---
+
+# Editor Options
+
+This page documents all editor options configured in `lua/leyland/core/options.lua`. These settings control Neovim's behavior, appearance, and editing features.
+
+## Leader Key
+
+The leader key is set to Space, which is used as a prefix for many custom keybindings:
+
+```lua
+vim.g.mapleader = " "
+```
+
+## Appearance
+
+<Accordion title="Line Numbers">
+Display line numbers with relative numbering for easy motion commands:
+
+```lua
+opt.number = true           -- Show absolute line number on current line
+opt.relativenumber = true   -- Show relative line numbers
+```
+
+Relative line numbers make it easier to use motion commands like `10j` or `5k`.
+</Accordion>
+
+<Accordion title="Status Line and Command Line">
+Minimal statusline configuration with custom winbar:
+
+```lua
+opt.cmdheight = 0          -- Hide command line when not in use
+opt.laststatus = 0         -- Hide the statusline
+opt.winbar = "%f %h%m%r%=%l,%c %P"  -- Custom window bar showing file info
+```
+
+The winbar shows:
+- `%f` - File name
+- `%h%m%r` - Help, modified, and readonly flags
+- `%=` - Right align the following
+- `%l,%c` - Line and column number
+- `%P` - Percentage through file
+</Accordion>
+
+<Accordion title="Line Wrapping">
+```lua
+opt.wrap = false  -- Don't wrap long lines
+```
+
+Lines that exceed window width won't wrap to the next line. Use horizontal scrolling instead.
+</Accordion>
+
+<Accordion title="Sign Column">
+```lua
+opt.signcolumn = "yes"  -- Always show sign column
+```
+
+Keeps the sign column visible to prevent text from shifting when signs appear (diagnostics, git changes, etc.).
+</Accordion>
+
+<Accordion title="Color Scheme Settings">
+```lua
+opt.background = "dark"  -- Use dark background
+```
+
+Tells color schemes to use their dark variant.
+</Accordion>
+
+## Tabs & Indentation
+
+<Accordion title="Tab Settings">
+Configure how tabs and indentation work:
+
+```lua
+opt.tabstop = 2       -- 2 spaces for tabs (visual width)
+opt.shiftwidth = 2    -- 2 spaces for indent width
+opt.expandtab = true  -- Convert tabs to spaces
+opt.autoindent = true -- Copy indent from current line when starting new line
+```
+
+This configuration uses 2 spaces for indentation and converts all tabs to spaces. For help with autoindent, use `:h autoindent` in Neovim.
+</Accordion>
+
+## Search Settings
+
+<Accordion title="Case Sensitivity">
+Smart case-insensitive searching:
+
+```lua
+opt.ignorecase = true  -- Ignore case when searching
+opt.smartcase = true   -- If you include mixed case, search becomes case-sensitive
+```
+
+With these settings:
+- Searching for `foo` matches `foo`, `Foo`, `FOO`
+- Searching for `Foo` only matches `Foo`
+</Accordion>
+
+## File Management
+
+<Accordion title="Swap Files">
+```lua
+opt.swapfile = false  -- Disable swap file creation
+```
+
+Swap files are disabled to avoid clutter. Make sure to save your work regularly.
+</Accordion>
+
+<Accordion title="Netrw (File Explorer)">
+```lua
+vim.cmd("let g:netrw_liststyle = 3")
+```
+
+Sets netrw to use tree-style listing (style 3) for better directory visualization.
+</Accordion>
+
+## Editing Behavior
+
+<Accordion title="Backspace">
+```lua
+opt.backspace = "indent,eol,start"
+```
+
+Allows backspace to:
+- Delete indentation
+- Delete across line breaks (eol)
+- Delete characters inserted before entering insert mode
+</Accordion>
+
+<Accordion title="Clipboard Integration">
+```lua
+opt.clipboard:append("unnamedplus")
+```
+
+Use the system clipboard as the default register. This allows you to:
+- Copy from Neovim and paste in other applications
+- Copy from other applications and paste in Neovim
+
+Requires clipboard support (check with `:checkhealth`).
+</Accordion>
+
+## Window Splits
+
+<Accordion title="Split Behavior">
+Control where new splits open:
+
+```lua
+opt.splitright = true  -- Vertical splits open to the right
+opt.splitbelow = true  -- Horizontal splits open below
+```
+
+This creates a more intuitive split behavior, with new windows appearing in the direction you'd expect.
+</Accordion>
+
+## LSP Settings
+
+<Accordion title="Log Level">
+```lua
+vim.lsp.set_log_level("error")  -- Only show errors, not warnings
+```
+
+Reduces LSP log verbosity to only show errors, keeping the interface clean.
+</Accordion>
+
+## Customizing Options
+
+To modify these options, edit `lua/leyland/core/options.lua`:
+
+```lua title="lua/leyland/core/options.lua"
+local opt = vim.opt
+
+-- Add or modify options
+opt.tabstop = 4           -- Change to 4 spaces
+opt.wrap = true           -- Enable line wrapping
+opt.cursorline = true     -- Highlight current line
+```
+
+Changes take effect after restarting Neovim or running `:source $MYVIMRC`.
+
+## See Also
+
+- [Keymaps](/configuration/keymaps) - Keyboard shortcuts
+- [Autocommands](/configuration/autocommands) - Automatic behaviors
+- [Configuration Overview](/configuration/overview) - Overall structure

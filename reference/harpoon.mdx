@@ -1,0 +1,346 @@
+---
+title: 'Harpoon Configuration'
+description: 'Complete reference for Harpoon file navigation configuration'
+---
+
+## Overview
+
+Harpoon provides lightning-fast navigation between frequently used files. Mark important files and jump between them instantly with numeric keybindings.
+
+**Location:** `lua/leyland/plugins/harpoon.lua`
+
+---
+
+## Plugin Specification
+
+```lua
+return {
+  "ThePrimeagen/harpoon",
+  branch = "harpoon2",
+  opts = {
+    menu = {
+      width = vim.api.nvim_win_get_width(0) - 4,
+    },
+    settings = {
+      save_on_toggle = true,
+    },
+  },
+}
+```
+
+**Branch:** Using Harpoon 2 (latest version)
+
+---
+
+## Configuration Options
+
+### Menu Settings
+
+<ParamField path="menu.width" type="number" default="vim.api.nvim_win_get_width(0) - 4">
+  Sets menu width dynamically to current window width minus 4 columns
+</ParamField>
+
+### General Settings
+
+<ParamField path="settings.save_on_toggle" type="boolean" default="true">
+  Automatically saves the harpoon list when toggling the menu
+</ParamField>
+
+---
+
+## Keybindings
+
+### Core Actions
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<leader>H` | Add file | Add current file to harpoon list |
+| `<leader>h` | Toggle menu | Open/close harpoon quick menu |
+
+### File Selection
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<leader>1` | Select file 1 | Jump to first harpooned file |
+| `<leader>2` | Select file 2 | Jump to second harpooned file |
+| `<leader>3` | Select file 3 | Jump to third harpooned file |
+| `<leader>4` | Select file 4 | Jump to fourth harpooned file |
+| `<leader>5` | Select file 5 | Jump to fifth harpooned file |
+| `<leader>6` | Select file 6 | Jump to sixth harpooned file |
+| `<leader>7` | Select file 7 | Jump to seventh harpooned file |
+| `<leader>8` | Select file 8 | Jump to eighth harpooned file |
+| `<leader>9` | Select file 9 | Jump to ninth harpooned file |
+
+---
+
+## Workflow
+
+### Basic Usage
+
+1. **Mark important files:**
+   - Open a file you frequently use
+   - Press `<leader>H` to add it to your harpoon list
+   - Repeat for other important files
+
+2. **Quick navigation:**
+   - Press `<leader>1` to jump to first marked file
+   - Press `<leader>2` to jump to second marked file
+   - And so on...
+
+3. **Manage list:**
+   - Press `<leader>h` to open the menu
+   - Reorder files by moving lines
+   - Delete files with `dd`
+   - Close menu with `q` or `<Esc>`
+
+### Example Session
+
+```lua
+-- You're working on a feature across multiple files:
+-- 1. Open src/components/Header.tsx → <leader>H to mark
+-- 2. Open src/api/users.ts → <leader>H to mark  
+-- 3. Open src/utils/helpers.ts → <leader>H to mark
+
+-- Now quickly jump between them:
+-- <leader>1 → Header.tsx
+-- <leader>2 → users.ts
+-- <leader>3 → helpers.ts
+```
+
+---
+
+## Menu Navigation
+
+When the quick menu is open (`<leader>h`):
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<CR>` | Open file | Open selected file |
+| `j` | Move down | Move to next file |
+| `k` | Move up | Move to previous file |
+| `dd` | Delete | Remove file from list |
+| `q` | Quit | Close menu |
+| `<Esc>` | Quit | Close menu |
+
+You can also reorder files by cutting and pasting lines in the menu.
+
+---
+
+## API Reference
+
+### Adding Files
+
+```lua
+local harpoon = require("harpoon")
+
+-- Add current file
+harpoon:list():add()
+
+-- Add specific file
+harpoon:list():add({ value = "path/to/file.lua" })
+```
+
+### Selecting Files
+
+```lua
+local harpoon = require("harpoon")
+
+-- Select by index (1-based)
+harpoon:list():select(1)
+harpoon:list():select(2)
+
+-- Navigate next/prev
+harpoon:list():next()
+harpoon:list():prev()
+```
+
+### Menu Operations
+
+```lua
+local harpoon = require("harpoon")
+
+-- Toggle menu
+harpoon.ui:toggle_quick_menu(harpoon:list())
+```
+
+### List Operations
+
+```lua
+local harpoon = require("harpoon")
+local list = harpoon:list()
+
+-- Get all items
+local items = list:items()
+
+-- Get length
+local length = list:length()
+
+-- Remove item
+list:remove()
+
+-- Clear all
+list:clear()
+```
+
+---
+
+## Customization Examples
+
+### Custom Menu Width
+
+```lua
+opts = {
+  menu = {
+    width = 80,  -- Fixed width
+  },
+}
+```
+
+### Custom Menu Height
+
+```lua
+opts = {
+  menu = {
+    height = 10,
+  },
+}
+```
+
+### Disable Auto-save
+
+```lua
+opts = {
+  settings = {
+    save_on_toggle = false,
+  },
+}
+```
+
+### Custom Keybindings
+
+```lua
+-- Add to your config
+vim.keymap.set("n", "<leader>ha", function()
+  require("harpoon"):list():add()
+end, { desc = "Harpoon add file" })
+
+vim.keymap.set("n", "<leader>hn", function()
+  require("harpoon"):list():next()
+end, { desc = "Harpoon next file" })
+
+vim.keymap.set("n", "<leader>hp", function()
+  require("harpoon"):list():prev()
+end, { desc = "Harpoon prev file" })
+```
+
+### Per-Project Lists
+
+Harpoon automatically maintains separate lists per project (based on working directory).
+
+---
+
+## Tips and Tricks
+
+1. **Mark files in order of importance:** Put your most-used file at position 1
+2. **Use muscle memory:** The numeric keys become second nature with practice
+3. **Review your list:** Open the menu (`<leader>h`) periodically to clean up
+4. **Combine with Telescope:** Use Telescope to find files, then harpoon them for quick access
+5. **Project workflow:** Mark files at the start of a work session for efficient navigation
+
+---
+
+## Comparison with Other Navigation
+
+### Harpoon vs Telescope
+
+| Feature | Harpoon | Telescope |
+|---------|---------|------------|
+| **Purpose** | Quick access to marked files | Search all files |
+| **Speed** | Instant (single keypress) | Fast (requires fuzzy search) |
+| **Setup** | Manual marking | None needed |
+| **Best for** | Files you return to often | Finding any file |
+
+**Use both:** Telescope to discover files, Harpoon to return to them quickly.
+
+### Harpoon vs Buffers
+
+| Feature | Harpoon | Buffer List |
+|---------|---------|-------------|
+| **Persistence** | Per-project lists | Session-based |
+| **Size** | Small curated list (typically 5-9 files) | All open files |
+| **Navigation** | Direct numeric access | Sequential or search |
+| **Best for** | Core files in current task | All recently opened files |
+
+---
+
+## Persistence
+
+Harpoon lists are automatically saved and restored:
+
+- **Location:** `~/.local/state/nvim/harpoon/`
+- **Per-project:** Separate list for each working directory
+- **Automatic:** No manual save/load needed
+
+---
+
+## Common Workflows
+
+### Feature Development
+
+```
+1. Open component file → <leader>H
+2. Open test file → <leader>H
+3. Open API file → <leader>H
+4. Jump between them with <leader>1, <leader>2, <leader>3
+```
+
+### Bug Investigation
+
+```
+1. Open file with bug → <leader>H
+2. Open related files → <leader>H for each
+3. Navigate freely with <leader>1-9
+4. Fix bug across files efficiently
+```
+
+### Refactoring
+
+```
+1. Mark all files that need changes
+2. Make changes in first file → <leader>2
+3. Make changes in second file → <leader>3
+4. Continue across all files
+5. Review with <leader>h menu
+```
+
+---
+
+## Integration with Other Plugins
+
+### With Telescope
+
+```lua
+-- Find file with Telescope, then harpoon it
+vim.keymap.set("n", "<leader><leader>", function()
+  require("telescope.builtin").find_files({
+    attach_mappings = function(_, map)
+      map("i", "<C-h>", function(prompt_bufnr)
+        local selection = require("telescope.actions.state").get_selected_entry()
+        require("telescope.actions").close(prompt_bufnr)
+        vim.cmd("edit " .. selection.path)
+        require("harpoon"):list():add()
+      end)
+      return true
+    end,
+  })
+end)
+```
+
+### With nvim-tree
+
+Add files from nvim-tree:
+
+```lua
+-- In nvim-tree, press 'h' on a file to harpoon it
+-- Custom keymap in nvim-tree config
+```

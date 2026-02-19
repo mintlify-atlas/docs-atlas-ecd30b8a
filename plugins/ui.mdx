@@ -1,0 +1,365 @@
+---
+title: 'UI Plugins'
+description: 'Dashboard, colorschemes, and interface enhancements'
+---
+
+## Overview
+
+nvim-luffy features a beautiful, customized UI with a One Piece-themed dashboard, multiple colorschemes, and smooth interface enhancements.
+
+## alpha-nvim
+
+[alpha-nvim](https://github.com/goolord/alpha-nvim) provides a customizable dashboard that appears when you start Neovim.
+
+### Configuration
+
+Located in `lua/leyland/plugins/alpha.lua:1-69`:
+
+```lua
+return {
+  "goolord/alpha-nvim",
+  event = "VimEnter",
+  config = function()
+    local alpha = require("alpha")
+    local dashboard = require("alpha.themes.dashboard")
+
+    dashboard.section.header.val = {
+      -- One Piece ASCII art (Luffy)
+      "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣤⠶⠶⠶⠶⠤⠤⠤⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+      -- ... (full ASCII art)
+    }
+
+    dashboard.section.buttons.val = {
+      dashboard.button("f", "  Find file", ":Telescope find_files <CR>"),
+      dashboard.button("r", "  Recent files", ":Telescope oldfiles <CR>"),
+      dashboard.button("q", "  Quit", ":qa<CR>"),
+    }
+
+    dashboard.section.footer.val = {
+      "",
+      '"Maybe the One Piece was the commits you made along the way."',
+      "",
+    }
+
+    alpha.setup(dashboard.opts)
+  end,
+}
+```
+
+### Dashboard Features
+
+<CardGroup cols={2}>
+  <Card title="One Piece ASCII Art" icon="hat-cowboy">
+    Custom Luffy ASCII art header
+  </Card>
+  
+  <Card title="Quick Actions" icon="bolt">
+    Fast access to common operations
+  </Card>
+  
+  <Card title="Motivational Quote" icon="quote-left">
+    Coding wisdom from the high seas
+  </Card>
+  
+  <Card title="Auto-hide" icon="eye-slash">
+    Disappears when you start working
+  </Card>
+</CardGroup>
+
+### Quick Actions
+
+| Key | Action | Command |
+|-----|--------|---------|
+| `f` | Find file | Opens Telescope file finder |
+| `r` | Recent files | Shows recently opened files |
+| `q` | Quit | Exit Neovim |
+
+### The One Piece Dashboard
+
+When you launch Neovim without a file, you'll see:
+
+1. **Luffy ASCII Art** - A detailed ASCII art of the Straw Hat captain
+2. **Inspirational Quote** - "Maybe the One Piece was the commits you made along the way."
+3. **Action Buttons** - Quick access to common tasks
+
+Press any action key or start typing to dismiss the dashboard.
+
+## Colorschemes
+
+nvim-luffy includes multiple high-quality colorschemes to suit different preferences and lighting conditions.
+
+### Configuration
+
+Located in `lua/leyland/plugins/colorscheme.lua:1-40`:
+
+```lua
+return {
+  {
+    "catppuccin/nvim",
+    name = "catppuccin",
+    priority = 1000,
+  },
+  {
+    "folke/tokyonight.nvim",
+    priority = 1000,
+  },
+  {
+    "miikanissi/modus-themes.nvim",
+    priority = 1000,
+  },
+  {
+    "ribru17/bamboo.nvim",
+    lazy = false,
+    priority = 1000,
+  },
+  {
+    "navarasu/onedark.nvim",
+    priority = 1000,
+  },
+  {
+    "rose-pine/neovim",
+    name = "rose-pine",
+    priority = 1000,
+    config = function()
+      -- Default colorscheme
+      vim.cmd.colorscheme("bamboo")
+    end,
+  },
+}
+```
+
+### Available Colorschemes
+
+<Tabs>
+  <Tab title="Bamboo (Default)">
+    **ribru17/bamboo.nvim**
+    
+    A warm, comfortable colorscheme with excellent contrast and readability.
+    
+    **Features:**
+    - Warm color palette
+    - Great for long coding sessions
+    - Excellent syntax highlighting
+    - Easy on the eyes
+    
+    **Variants:**
+    - `bamboo` (default)
+    - `bamboo-light`
+    
+    **Set as default:** Yes
+  </Tab>
+  
+  <Tab title="Catppuccin">
+    **catppuccin/nvim**
+    
+    Soothing pastel theme for the high-spirited.
+    
+    **Features:**
+    - Soft, pastel colors
+    - Multiple flavors
+    - Wide plugin support
+    - Highly customizable
+    
+    **Variants:**
+    - `catppuccin-latte` (light)
+    - `catppuccin-frappe`
+    - `catppuccin-macchiato`
+    - `catppuccin-mocha` (dark)
+    
+    **Use:** `:colorscheme catppuccin`
+  </Tab>
+  
+  <Tab title="Tokyo Night">
+    **folke/tokyonight.nvim**
+    
+    Clean, dark Neovim theme inspired by Tokyo's night skyline.
+    
+    **Features:**
+    - Dark, vibrant colors
+    - Created by folke (prolific Neovim plugin author)
+    - Excellent LSP/Treesitter support
+    - Multiple styles
+    
+    **Variants:**
+    - `tokyonight-night` (default)
+    - `tokyonight-storm`
+    - `tokyonight-day`
+    - `tokyonight-moon`
+    
+    **Use:** `:colorscheme tokyonight`
+  </Tab>
+  
+  <Tab title="Rose Pine">
+    **rose-pine/neovim**
+    
+    Low-contrast theme that stays out of your way.
+    
+    **Features:**
+    - Low contrast for reduced eye strain
+    - Subtle colors
+    - Minimal distraction
+    - Great for focus
+    
+    **Variants:**
+    - `rose-pine` (default)
+    - `rose-pine-moon`
+    - `rose-pine-dawn` (light)
+    
+    **Use:** `:colorscheme rose-pine`
+  </Tab>
+  
+  <Tab title="Modus">
+    **miikanissi/modus-themes.nvim**
+    
+    Highly accessible themes that conform to WCAG AAA standards.
+    
+    **Features:**
+    - Maximum accessibility
+    - High contrast
+    - Professional appearance
+    - Legibility focused
+    
+    **Variants:**
+    - `modus_operandi` (light)
+    - `modus_vivendi` (dark)
+    
+    **Use:** `:colorscheme modus_vivendi`
+  </Tab>
+  
+  <Tab title="One Dark">
+    **navarasu/onedark.nvim**
+    
+    Atom's iconic One Dark theme for Neovim.
+    
+    **Features:**
+    - Classic Atom look
+    - Familiar to many developers
+    - Multiple style variations
+    - Wide language support
+    
+    **Variants:**
+    - `onedark` (default)
+    - Multiple style options
+    
+    **Use:** `:colorscheme onedark`
+  </Tab>
+</Tabs>
+
+### Changing Colorschemes
+
+<Steps>
+  <Step title="Try a colorscheme temporarily">
+    ```vim
+    :colorscheme tokyonight
+    ```
+  </Step>
+  
+  <Step title="Make it permanent">
+    Edit `lua/leyland/plugins/colorscheme.lua:37`:
+    
+    ```lua
+    vim.cmd.colorscheme("your-chosen-theme")
+    ```
+  </Step>
+  
+  <Step title="Restart Neovim">
+    Restart to apply the change permanently.
+  </Step>
+</Steps>
+
+### Colorscheme Comparison
+
+| Theme | Style | Contrast | Best For |
+|-------|-------|----------|----------|
+| **Bamboo** | Warm | Medium | Long sessions, default |
+| **Catppuccin** | Pastel | Low-Medium | Soft, comfortable coding |
+| **Tokyo Night** | Cool | Medium-High | Dark environments |
+| **Rose Pine** | Muted | Low | Focus, minimal distraction |
+| **Modus** | Professional | High | Accessibility, presentations |
+| **One Dark** | Balanced | Medium | Familiarity, classic look |
+
+## snacks.nvim
+
+[snacks.nvim](https://github.com/folke/snacks.nvim) provides smooth scrolling and other UI enhancements.
+
+### Configuration
+
+Located in `lua/leyland/plugins/snacks.lua:1-14`:
+
+```lua
+return {
+  "folke/snacks.nvim",
+  priority = 1000,
+  lazy = false,
+  opts = {
+    scroll = {
+      enabled = true,
+      animate = {
+        duration = { step = 10, total = 100 },
+        easing = "linear",
+      },
+    },
+  },
+}
+```
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Smooth Scrolling" icon="arrows-up-down">
+    Animated scrolling with customizable speed
+  </Card>
+  
+  <Card title="Linear Easing" icon="wave-square">
+    Consistent scroll speed
+  </Card>
+  
+  <Card title="Fast Animation" icon="bolt">
+    100ms total duration for responsiveness
+  </Card>
+  
+  <Card title="Always Loaded" icon="check">
+    Not lazy-loaded for immediate availability
+  </Card>
+</CardGroup>
+
+### Scroll Settings
+
+- **Duration:** 100ms total
+- **Step:** 10ms per frame
+- **Easing:** Linear (constant speed)
+- **Enabled by default:** Yes
+
+## nvim-web-devicons
+
+[nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons) adds file type icons throughout the UI.
+
+### Features
+
+- **File type icons** - Visual indicators in file explorers
+- **Plugin integration** - Works with Telescope, nvim-tree, etc.
+- **Wide coverage** - Icons for hundreds of file types
+- **Color coding** - Language-specific colors
+
+### Supported Everywhere
+
+Icons appear in:
+- Telescope pickers
+- nvim-tree file explorer
+- Completion menus
+- Buffer tabs
+- Status lines
+
+## UI Tips
+
+<Tip>
+**Performance:** All UI plugins are loaded with `priority = 1000` to ensure the interface looks great immediately on startup.
+</Tip>
+
+<Warning>
+**Nerd Fonts Required:** To display icons correctly, install a [Nerd Font](https://www.nerdfonts.com/) and configure your terminal to use it.
+</Warning>
+
+<Tip>
+**Dashboard Customization:** Edit the ASCII art in `alpha.lua:8-42` to personalize your dashboard with different characters or quotes.
+</Tip>

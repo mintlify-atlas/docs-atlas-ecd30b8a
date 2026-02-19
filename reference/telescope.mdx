@@ -1,0 +1,347 @@
+---
+title: 'Telescope Configuration'
+description: 'Complete reference for Telescope fuzzy finder configuration'
+---
+
+## Overview
+
+Telescope is the primary fuzzy finder in nvim-luffy, providing powerful file search, live grep, and buffer navigation capabilities.
+
+**Location:** `lua/leyland/plugins/telescope.lua`
+
+---
+
+## Plugin Specification
+
+```lua
+return {
+  "nvim-telescope/telescope.nvim",
+  branch = "0.1.x",
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+    { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+    "nvim-tree/nvim-web-devicons",
+    "folke/todo-comments.nvim",
+  },
+}
+```
+
+---
+
+## Dependencies
+
+| Plugin | Purpose |
+|--------|--------|
+| `plenary.nvim` | Required Lua utility library |
+| `telescope-fzf-native.nvim` | FZF algorithm for faster sorting (compiled with make) |
+| `nvim-web-devicons` | File icons in results |
+| `todo-comments.nvim` | Enables TODO comment search integration |
+
+---
+
+## Configuration
+
+### Default Settings
+
+```lua
+telescope.setup({
+  defaults = {
+    path_display = { "filename_first" },
+    mappings = {
+      i = {
+        ["<C-k>"] = actions.move_selection_previous,
+        ["<C-j>"] = actions.move_selection_next,
+        ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+      },
+    },
+  },
+})
+```
+
+### Display Options
+
+<ParamField path="path_display" type="table" default='{ "filename_first" }'>
+  Controls how file paths are displayed in results.
+  - `filename_first` - Shows filename before directory path
+</ParamField>
+
+### Picker Configuration
+
+```lua
+pickers = {
+  live_grep = {
+    path_display = { "truncate" },
+  },
+}
+```
+
+The `live_grep` picker uses truncated paths instead of filename-first to save space.
+
+---
+
+## Insert Mode Keybindings
+
+These keybindings work in all Telescope pickers when in insert mode:
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<C-k>` | Move selection previous | Move to previous result |
+| `<C-j>` | Move selection next | Move to next result |
+| `<C-q>` | Send to quickfix list | Send selected items to quickfix and open |
+
+---
+
+## Global Keymaps
+
+### File Finding
+
+| Key | Picker | Description |
+|-----|--------|-------------|
+| `<leader><leader>` | `find_files` | Fuzzy find files in current working directory |
+| `<leader>fr` | `oldfiles` | Fuzzy find recent files |
+
+### Search
+
+| Key | Picker | Description |
+|-----|--------|-------------|
+| `<leader>/` | `live_grep` | Search for string in current working directory |
+| `<leader>fc` | `grep_string` | Find string under cursor in current working directory |
+| `<leader>ft` | `TodoTelescope` | Find TODO comments |
+
+### Other
+
+| Key | Picker | Description |
+|-----|--------|-------------|
+| `<leader>fk` | `keymaps` | Search through all keymaps |
+
+---
+
+## Extensions
+
+### FZF Native
+
+```lua
+telescope.load_extension("fzf")
+```
+
+Loads the FZF native extension for improved sorting performance.
+
+**Benefits:**
+- Much faster sorting algorithm
+- Better fuzzy matching
+- Compiled C code for performance
+
+---
+
+## Picker Reference
+
+### find_files
+
+Finds files in the current working directory.
+
+**Features:**
+- Respects `.gitignore`
+- Shows hidden files with flag
+- Fast file system search
+
+**Usage:**
+```lua
+require("telescope.builtin").find_files()
+```
+
+### oldfiles
+
+Searches recently opened files.
+
+**Features:**
+- Persistent across sessions
+- Sorted by most recent
+
+**Usage:**
+```lua
+require("telescope.builtin").oldfiles()
+```
+
+### live_grep
+
+Searches file contents using ripgrep.
+
+**Features:**
+- Live updating results
+- Respects `.gitignore`
+- Regex support
+- Very fast on large codebases
+
+**Usage:**
+```lua
+require("telescope.builtin").live_grep()
+```
+
+### grep_string
+
+Searches for the string under the cursor.
+
+**Features:**
+- Instant search of word under cursor
+- Shows all occurrences
+- Useful for finding usages
+
+**Usage:**
+```lua
+require("telescope.builtin").grep_string()
+```
+
+### keymaps
+
+Searches all defined keymaps.
+
+**Features:**
+- Shows key, mode, and description
+- Filter by mode
+- Execute keymap from picker
+
+**Usage:**
+```lua
+require("telescope.builtin").keymaps()
+```
+
+---
+
+## API Reference
+
+### Basic Picker Usage
+
+```lua
+local builtin = require("telescope.builtin")
+
+-- Find files
+builtin.find_files()
+
+-- Find files with options
+builtin.find_files({
+  hidden = true,
+  no_ignore = true,
+})
+
+-- Live grep with options
+builtin.live_grep({
+  grep_open_files = true,  -- Only search open buffers
+})
+```
+
+### Custom Picker
+
+```lua
+local pickers = require("telescope.pickers")
+local finders = require("telescope.finders")
+local conf = require("telescope.config").values
+
+local my_picker = function(opts)
+  opts = opts or {}
+  pickers.new(opts, {
+    prompt_title = "My Picker",
+    finder = finders.new_table({
+      results = { "item1", "item2", "item3" },
+    }),
+    sorter = conf.generic_sorter(opts),
+  }):find()
+end
+
+-- Use it
+my_picker()
+```
+
+### Add Custom Keymap
+
+```lua
+vim.keymap.set("n", "<leader>fb", function()
+  require("telescope.builtin").buffers()
+end, { desc = "Find buffers" })
+```
+
+---
+
+## Customization Examples
+
+### Show Hidden Files by Default
+
+```lua
+telescope.setup({
+  pickers = {
+    find_files = {
+      hidden = true,
+    },
+  },
+})
+```
+
+### Custom Path Display
+
+```lua
+telescope.setup({
+  defaults = {
+    path_display = { "smart" },  -- Smart truncation
+    -- or
+    path_display = { "absolute" },  -- Show full paths
+    -- or
+    path_display = { "truncate" },  -- Truncate from middle
+  },
+})
+```
+
+### Custom Layout
+
+```lua
+telescope.setup({
+  defaults = {
+    layout_strategy = "vertical",
+    layout_config = {
+      vertical = {
+        width = 0.9,
+        height = 0.9,
+        preview_height = 0.6,
+      },
+    },
+  },
+})
+```
+
+### Additional Insert Mode Mappings
+
+```lua
+telescope.setup({
+  defaults = {
+    mappings = {
+      i = {
+        ["<C-k>"] = actions.move_selection_previous,
+        ["<C-j>"] = actions.move_selection_next,
+        ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+        -- Add custom mappings
+        ["<C-h>"] = "which_key",  -- Show help
+        ["<C-u>"] = actions.preview_scrolling_up,
+        ["<C-d>"] = actions.preview_scrolling_down,
+      },
+    },
+  },
+})
+```
+
+---
+
+## LSP Integration
+
+Telescope is integrated with LSP for code navigation. See [LSP Reference](/reference/lsp) for LSP-specific Telescope keymaps:
+
+- `gR` - LSP references
+- `gi` - LSP implementations  
+- `gt` - LSP type definitions
+- `<leader>D` - Buffer diagnostics
+
+---
+
+## Performance Tips
+
+1. **Use FZF native extension** - Already enabled for better performance
+2. **Limit file search depth** - Add to find_files options: `{ search_dirs = { "src" } }`
+3. **Ignore directories** - Telescope respects `.gitignore` and `.rgignore`
+4. **Use specific pickers** - More targeted pickers are faster than generic ones

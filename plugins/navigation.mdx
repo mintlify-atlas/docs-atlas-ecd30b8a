@@ -1,0 +1,627 @@
+---
+title: 'Navigation Plugins'
+description: 'File finding, bookmarking, and navigation with Telescope, Harpoon, and nvim-tree'
+---
+
+## Overview
+
+nvim-luffy provides powerful navigation tools for quickly finding files, jumping between buffers, and exploring your project structure.
+
+## Telescope
+
+[Telescope](https://github.com/nvim-telescope/telescope.nvim) is a highly extendable fuzzy finder for files, text, Git branches, and more.
+
+### Configuration
+
+Located in `lua/leyland/plugins/telescope.lua:1-45`:
+
+```lua
+return {
+  "nvim-telescope/telescope.nvim",
+  branch = "0.1.x",
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+    { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+    "nvim-tree/nvim-web-devicons",
+    "folke/todo-comments.nvim",
+  },
+  config = function()
+    local telescope = require("telescope")
+    local actions = require("telescope.actions")
+
+    telescope.setup({
+      defaults = {
+        path_display = { "filename_first" },
+        mappings = {
+          i = {
+            ["<C-k>"] = actions.move_selection_previous,
+            ["<C-j>"] = actions.move_selection_next,
+            ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+          },
+        },
+      },
+      pickers = {
+        live_grep = {
+          path_display = { "truncate" },
+        },
+      },
+    })
+
+    telescope.load_extension("fzf")
+  end,
+}
+```
+
+### Keymaps
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<leader><leader>` | Find files | Fuzzy find files in current directory |
+| `<leader>fr` | Recent files | Find recently opened files |
+| `<leader>/` | Live grep | Search for text across project |
+| `<leader>fc` | Grep string | Find string under cursor |
+| `<leader>ft` | Find TODOs | Search TODO comments |
+| `<leader>fk` | Find keymaps | Search all keymaps |
+
+Located in `lua/leyland/plugins/telescope.lua:38-43`.
+
+### Telescope Pickers
+
+<Tabs>
+  <Tab title="File Finders">
+    **Find Files** - `<leader><leader>`
+    
+    Fuzzy find any file in your project:
+    - Type to filter results
+    - Respects `.gitignore`
+    - Shows hidden files with special flag
+    
+    **Recent Files** - `<leader>fr`
+    
+    Quickly access recently opened files:
+    - Sorted by most recent
+    - Cross-session history
+    - Quick access to working files
+  </Tab>
+  
+  <Tab title="Text Search">
+    **Live Grep** - `<leader>/`
+    
+    Search text across your entire project:
+    - Live results as you type
+    - Regex support
+    - Respects `.gitignore`
+    - Fast ripgrep backend
+    
+    **Grep String** - `<leader>fc`
+    
+    Search for the word under cursor:
+    - Instant search
+    - No typing required
+    - Perfect for finding references
+  </Tab>
+  
+  <Tab title="Special Searches">
+    **Find TODOs** - `<leader>ft`
+    
+    Search for TODO comments:
+    - `TODO:` comments
+    - `FIXME:` comments
+    - `HACK:` comments
+    - `NOTE:` comments
+    
+    Powered by [todo-comments.nvim](https://github.com/folke/todo-comments.nvim)
+    
+    **Find Keymaps** - `<leader>fk`
+    
+    Search all configured keymaps:
+    - Find keymap by action
+    - Discover available shortcuts
+    - Learn new keybindings
+  </Tab>
+</Tabs>
+
+### Telescope Navigation
+
+<Tabs>
+  <Tab title="Insert Mode">
+    While typing in Telescope:
+    
+    | Key | Action |
+    |-----|--------|
+    | `<C-j>` | Move to next result |
+    | `<C-k>` | Move to previous result |
+    | `<C-q>` | Send to quickfix list |
+    | `<CR>` | Select result |
+    | `<Esc>` | Close Telescope |
+    | `<C-u>` | Clear prompt |
+  </Tab>
+  
+  <Tab title="Normal Mode">
+    Press `<Esc>` to enter normal mode:
+    
+    | Key | Action |
+    |-----|--------|
+    | `j` | Move down |
+    | `k` | Move up |
+    | `gg` | Go to first |
+    | `G` | Go to last |
+    | `<CR>` | Select result |
+    | `q` | Close Telescope |
+  </Tab>
+  
+  <Tab title="Preview">
+    | Key | Action |
+    |-----|--------|
+    | `<C-d>` | Scroll preview down |
+    | `<C-u>` | Scroll preview up |
+    | `<Tab>` | Toggle selection |
+  </Tab>
+</Tabs>
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Filename First" icon="file">
+    Shows filename before path for better scanning
+  </Card>
+  
+  <Card title="FZF Native" icon="bolt">
+    Fast C-based sorting algorithm
+  </Card>
+  
+  <Card title="Icons" icon="icons">
+    File type icons from nvim-web-devicons
+  </Card>
+  
+  <Card title="Live Preview" icon="eye">
+    Preview files before opening
+  </Card>
+</CardGroup>
+
+### Advanced Usage
+
+**Search in specific directory:**
+```vim
+:Telescope find_files cwd=~/projects
+```
+
+**Search with glob pattern:**
+```vim
+:Telescope find_files find_command=rg,--files,--glob,*.lua
+```
+
+**Search git files only:**
+```vim
+:Telescope git_files
+```
+
+## Harpoon
+
+[Harpoon](https://github.com/ThePrimeagen/harpoon) provides lightning-fast navigation between your most important files.
+
+### Configuration
+
+Located in `lua/leyland/plugins/harpoon.lua:1-42`:
+
+```lua
+return {
+  "ThePrimeagen/harpoon",
+  branch = "harpoon2",
+  opts = {
+    menu = {
+      width = vim.api.nvim_win_get_width(0) - 4,
+    },
+    settings = {
+      save_on_toggle = true,
+    },
+  },
+  keys = function()
+    local keys = {
+      {
+        "<leader>H",
+        function()
+          require("harpoon"):list():add()
+        end,
+        desc = "Harpoon File",
+      },
+      {
+        "<leader>h",
+        function()
+          local harpoon = require("harpoon")
+          harpoon.ui:toggle_quick_menu(harpoon:list())
+        end,
+        desc = "Harpoon Quick Menu",
+      },
+    }
+
+    for i = 1, 9 do
+      table.insert(keys, {
+        "<leader>" .. i,
+        function()
+          require("harpoon"):list():select(i)
+        end,
+        desc = "Harpoon to File " .. i,
+      })
+    end
+    return keys
+  end,
+}
+```
+
+### Keymaps
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<leader>H` | Add file | Add current file to Harpoon list |
+| `<leader>h` | Quick menu | Toggle Harpoon quick menu |
+| `<leader>1` | Go to file 1 | Jump to first harpooned file |
+| `<leader>2` | Go to file 2 | Jump to second harpooned file |
+| `<leader>3` | Go to file 3 | Jump to third harpooned file |
+| ... | ... | ... |
+| `<leader>9` | Go to file 9 | Jump to ninth harpooned file |
+
+Located in `lua/leyland/plugins/harpoon.lua:12-41`.
+
+### How Harpoon Works
+
+<Steps>
+  <Step title="Mark important files">
+    While in a file you use frequently, press `<leader>H` to add it to your Harpoon list.
+  </Step>
+  
+  <Step title="Build your list">
+    Add up to 9 files that you switch between regularly.
+  </Step>
+  
+  <Step title="Jump instantly">
+    Press `<leader>1` through `<leader>9` to jump to files instantly - no fuzzy finding needed!
+  </Step>
+  
+  <Step title="Manage your list">
+    Press `<leader>h` to see and reorder your harpooned files.
+  </Step>
+</Steps>
+
+### Workflow Example
+
+Imagine working on a web app:
+
+1. `<leader>H` in `src/index.tsx` (mark as position 1)
+2. `<leader>H` in `src/api/users.ts` (mark as position 2)
+3. `<leader>H` in `src/components/Header.tsx` (mark as position 3)
+4. `<leader>H` in `src/styles/global.css` (mark as position 4)
+
+Now you can:
+- `<leader>1` - Jump to index
+- `<leader>2` - Jump to users API
+- `<leader>3` - Jump to Header component
+- `<leader>4` - Jump to styles
+
+No fuzzy finding, no searching - instant navigation!
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Instant Jumps" icon="bolt">
+    Jump to files with a single keypress
+  </Card>
+  
+  <Card title="Auto-save" icon="floppy-disk">
+    List saves automatically when toggling menu
+  </Card>
+  
+  <Card title="Per-project" icon="folder">
+    Different harpoon lists for different projects
+  </Card>
+  
+  <Card title="Quick Menu" icon="list">
+    Visual interface for managing marks
+  </Card>
+</CardGroup>
+
+### Harpoon vs Telescope
+
+<Tabs>
+  <Tab title="When to use Harpoon">
+    **Harpoon** is perfect for:
+    
+    - Files you're actively working on
+    - Switching between 2-9 files repeatedly
+    - Zero-thought navigation
+    - Muscle memory workflows
+    
+    Example: Switching between component and test file
+  </Tab>
+  
+  <Tab title="When to use Telescope">
+    **Telescope** is perfect for:
+    
+    - Finding files you haven't opened recently
+    - Exploring unfamiliar codebases
+    - Searching by partial name
+    - One-off file access
+    
+    Example: Finding a config file you rarely edit
+  </Tab>
+</Tabs>
+
+## nvim-tree
+
+[nvim-tree](https://github.com/nvim-tree/nvim-tree.lua) is a file explorer sidebar for visual project navigation.
+
+### Configuration
+
+Located in `lua/leyland/plugins/nvim-tree.lua:1-62`:
+
+```lua
+return {
+  "nvim-tree/nvim-tree.lua",
+  dependencies = "nvim-tree/nvim-web-devicons",
+  keys = {
+    { "<leader>e", "<cmd>NvimTreeFindFileToggle<cr>", desc = "Toggle file explorer" },
+  },
+  config = function()
+    local nvimtree = require("nvim-tree")
+    local api = require("nvim-tree.api")
+
+    vim.g.loaded_netrw = 1
+    vim.g.loaded_netrwPlugin = 1
+
+    nvimtree.setup({
+      view = {
+        width = 50,
+        relativenumber = true,
+        side = "right",
+      },
+      renderer = {
+        indent_markers = {
+          enable = true,
+        },
+        icons = {
+          glyphs = {
+            folder = {
+              arrow_closed = "",
+              arrow_open = "",
+            },
+          },
+        },
+      },
+      actions = {
+        open_file = {
+          window_picker = {
+            enable = false,
+          },
+        },
+      },
+      filters = {
+        custom = { ".DS_Store" },
+      },
+      git = {
+        ignore = false,
+      },
+    })
+  end,
+}
+```
+
+### Keymaps
+
+<Tabs>
+  <Tab title="Global">
+    | Key | Action | Description |
+    |-----|--------|-------------|
+    | `<leader>e` | Toggle tree | Toggle file explorer and focus current file |
+    
+    Located in `lua/leyland/plugins/nvim-tree.lua:4-6`.
+  </Tab>
+  
+  <Tab title="Inside nvim-tree">
+    | Key | Action | Description |
+    |-----|--------|-------------|
+    | `l` | Open | Open file or expand directory |
+    | `h` | Close | Close directory or go to parent |
+    | `<CR>` | Open | Open file |
+    | `a` | Create | Create new file/directory |
+    | `d` | Delete | Delete file/directory |
+    | `r` | Rename | Rename file/directory |
+    | `x` | Cut | Cut file/directory |
+    | `c` | Copy | Copy file/directory |
+    | `p` | Paste | Paste file/directory |
+    | `y` | Copy name | Copy file name |
+    | `Y` | Copy path | Copy relative path |
+    | `gy` | Copy abs path | Copy absolute path |
+    | `R` | Refresh | Refresh tree |
+    | `?` | Help | Show all keybindings |
+    
+    Custom mappings in `lua/leyland/plugins/nvim-tree.lua:23-24`.
+  </Tab>
+</Tabs>
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Right-side Panel" icon="sidebar">
+    Opens on the right side of the screen
+  </Card>
+  
+  <Card title="Relative Numbers" icon="list-ol">
+    Easier navigation with line numbers
+  </Card>
+  
+  <Card title="Indent Markers" icon="diagram-project">
+    Visual guides for directory structure
+  </Card>
+  
+  <Card title="Git Integration" icon="git-alt">
+    Shows git status for files
+  </Card>
+  
+  <Card title="Auto-focus" icon="crosshairs">
+    Automatically finds and highlights current file
+  </Card>
+  
+  <Card title="Custom Icons" icon="icons">
+    File type icons and folder arrows
+  </Card>
+</CardGroup>
+
+### File Operations
+
+<Steps>
+  <Step title="Create file">
+    1. Press `a` on a directory
+    2. Type filename
+    3. Press `<CR>`
+    4. For directory, end name with `/`
+  </Step>
+  
+  <Step title="Delete file">
+    1. Navigate to file
+    2. Press `d`
+    3. Confirm deletion
+  </Step>
+  
+  <Step title="Rename file">
+    1. Navigate to file
+    2. Press `r`
+    3. Edit name
+    4. Press `<CR>`
+  </Step>
+  
+  <Step title="Move file">
+    1. Navigate to file
+    2. Press `x` (cut)
+    3. Navigate to destination
+    4. Press `p` (paste)
+  </Step>
+</Steps>
+
+### Configuration Details
+
+**View Settings:**
+- Width: 50 columns
+- Position: Right side
+- Numbers: Relative line numbers
+
+**Behavior:**
+- Git files shown (even if gitignored)
+- Custom filters exclude `.DS_Store`
+- Window picker disabled for simpler workflow
+
+**Navigation:**
+- `l`/`h` mapped to open/close (Vim-style)
+- Indent markers for visual hierarchy
+- Arrow icons for folder state
+
+## vim-tmux-navigator
+
+[vim-tmux-navigator](https://github.com/christoomey/vim-tmux-navigator) provides seamless navigation between Vim splits and tmux panes.
+
+### Configuration
+
+Located in `lua/leyland/plugins/init.lua:3`:
+
+```lua
+"christoomey/vim-tmux-navigator"
+```
+
+### Keymaps
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<C-h>` | Navigate left | Move to left split/pane |
+| `<C-j>` | Navigate down | Move to lower split/pane |
+| `<C-k>` | Navigate up | Move to upper split/pane |
+| `<C-l>` | Navigate right | Move to right split/pane |
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Seamless Navigation" icon="arrows-left-right-to-line">
+    Same keys work in Vim and tmux
+  </Card>
+  
+  <Card title="No Context Switch" icon="brain">
+    No mental overhead when switching
+  </Card>
+  
+  <Card title="Auto-detection" icon="wand-magic-sparkles">
+    Knows when to move splits vs panes
+  </Card>
+</CardGroup>
+
+### Setup with tmux
+
+Add to your `~/.tmux.conf`:
+
+```bash
+# Smart pane switching with awareness of Vim splits
+is_vim="ps -o state= -o comm= -t '#{pane_tty}' \
+    | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|n?vim?x?)(diff)?$'"
+bind-key -n 'C-h' if-shell "$is_vim" 'send-keys C-h'  'select-pane -L'
+bind-key -n 'C-j' if-shell "$is_vim" 'send-keys C-j'  'select-pane -D'
+bind-key -n 'C-k' if-shell "$is_vim" 'send-keys C-k'  'select-pane -U'
+bind-key -n 'C-l' if-shell "$is_vim" 'send-keys C-l'  'select-pane -R'
+```
+
+## Navigation Workflow
+
+### Recommended Workflow
+
+<Steps>
+  <Step title="Orient yourself">
+    ```vim
+    <leader>e  " Toggle nvim-tree to see project structure
+    ```
+  </Step>
+  
+  <Step title="Find files by name">
+    ```vim
+    <leader><leader>  " Telescope find files
+    ```
+  </Step>
+  
+  <Step title="Mark your core files">
+    ```vim
+    <leader>H  " Add to Harpoon (repeat for each core file)
+    ```
+  </Step>
+  
+  <Step title="Jump between core files">
+    ```vim
+    <leader>1  " Jump to first harpooned file
+    <leader>2  " Jump to second harpooned file
+    " etc.
+    ```
+  </Step>
+  
+  <Step title="Search when needed">
+    ```vim
+    <leader>/  " Live grep to find code
+    <leader>fc " Find references to symbol
+    ```
+  </Step>
+</Steps>
+
+## Tips
+
+<Tip>
+**File Explorer Position:** nvim-tree opens on the right to keep your main code window stable on the left.
+</Tip>
+
+<Tip>
+**Harpoon Discipline:** Only harpoon files you're actively working on. Remove files when done with them to keep your list focused.
+</Tip>
+
+<Tip>
+**Telescope Speed:** Press `<Esc>` to enter normal mode in Telescope for faster navigation with `j`/`k`.
+</Tip>
+
+<Warning>
+**Case Sensitivity:** Telescope searches are case-insensitive by default. Type uppercase letters for case-sensitive search.
+</Warning>
+
+<Tip>
+**Quick File Tree:** Use `<leader>e` to quickly jump to file explorer, orient yourself, then `<leader>e` again to return to editing.
+</Tip>

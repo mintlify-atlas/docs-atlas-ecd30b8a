@@ -1,0 +1,276 @@
+---
+title: 'Plugins Module'
+description: 'Complete reference for nvim-luffy plugin management system'
+---
+
+## Overview
+
+The plugins module (`lua/leyland/plugins/`) defines the plugin architecture and core dependencies for nvim-luffy. It uses lazy.nvim as the plugin manager.
+
+## Module Structure
+
+**Location:** `lua/leyland/plugins/init.lua`
+
+This is the main plugin specification file that defines core dependencies required by other plugins.
+
+---
+
+## Core Dependencies
+
+### Plenary
+
+```lua
+"nvim-lua/plenary.nvim"
+```
+
+**Description:** Lua utility functions library used by many Neovim plugins.
+
+**Purpose:** Provides common Lua functions for:
+- Asynchronous operations
+- File system operations
+- Path manipulation
+- Functional programming utilities
+
+**Required by:**
+- Telescope
+- Harpoon
+- Many other plugins in the ecosystem
+
+### Vim-TMux Navigator
+
+```lua
+"christoomey/vim-tmux-navigator"
+```
+
+**Description:** Seamless navigation between tmux panes and vim splits.
+
+**Purpose:** Allows unified navigation keybindings that work across both tmux and Neovim windows.
+
+**Default Keybindings:**
+- `<C-h>` - Navigate left
+- `<C-j>` - Navigate down
+- `<C-k>` - Navigate up
+- `<C-l>` - Navigate right
+
+---
+
+## Plugin Loading System
+
+nvim-luffy uses lazy.nvim's modular plugin loading system. Each plugin is defined in its own file under `lua/leyland/plugins/`.
+
+### Plugin Structure Convention
+
+Each plugin file returns a Lua table (or array of tables) with the plugin specification:
+
+```lua
+return {
+  "plugin-author/plugin-name",
+  dependencies = { "other-plugins" },
+  opts = { },
+  config = function()
+    -- Plugin setup code
+  end,
+}
+```
+
+### Plugin Loading
+
+lazy.nvim automatically loads all Lua files from the `lua/leyland/plugins/` directory.
+
+**Plugin files:**
+- `colorscheme.lua` - Colorscheme plugins
+- `telescope.lua` - Fuzzy finder
+- `treesitter.lua` - Syntax highlighting
+- `nvim-tree.lua` - File explorer
+- `harpoon.lua` - File navigation
+- `nvim-cmp.lua` - Autocompletion
+- `lsp/` - LSP configurations
+- And more...
+
+---
+
+## Plugin Specification Format
+
+### Basic Plugin
+
+```lua
+return {
+  "author/plugin-name"
+}
+```
+
+### Plugin with Options
+
+```lua
+return {
+  "author/plugin-name",
+  opts = {
+    setting1 = value1,
+    setting2 = value2,
+  }
+}
+```
+
+lazy.nvim automatically calls `require("plugin-name").setup(opts)`.
+
+### Plugin with Custom Configuration
+
+```lua
+return {
+  "author/plugin-name",
+  config = function()
+    local plugin = require("plugin-name")
+    plugin.setup({
+      -- Custom configuration
+    })
+    -- Additional setup code
+  end
+}
+```
+
+### Plugin with Dependencies
+
+```lua
+return {
+  "author/plugin-name",
+  dependencies = {
+    "author/dependency1",
+    "author/dependency2",
+  }
+}
+```
+
+Dependencies are loaded before the main plugin.
+
+### Plugin with Lazy Loading
+
+```lua
+return {
+  "author/plugin-name",
+  event = "VeryLazy",  -- Load after startup
+  cmd = "CommandName",  -- Load when command is used
+  keys = "<leader>key",  -- Load when key is pressed
+}
+```
+
+---
+
+## Adding New Plugins
+
+To add a new plugin to nvim-luffy:
+
+### Method 1: Create New Plugin File
+
+1. Create a new file: `lua/leyland/plugins/your-plugin.lua`
+2. Define the plugin specification:
+
+```lua
+return {
+  "author/plugin-name",
+  opts = {
+    -- Plugin options
+  },
+}
+```
+
+3. Restart Neovim - lazy.nvim will automatically detect and install the plugin
+
+### Method 2: Add to Existing File
+
+You can add plugins to `lua/leyland/plugins/init.lua` or any other plugin file:
+
+```lua
+return {
+  "nvim-lua/plenary.nvim",
+  "christoomey/vim-tmux-navigator",
+  -- Add your plugin here
+  "author/your-plugin",
+}
+```
+
+---
+
+## Plugin Management Commands
+
+lazy.nvim provides commands for managing plugins:
+
+| Command | Description |
+|---------|-------------|
+| `:Lazy` | Open lazy.nvim UI |
+| `:Lazy install` | Install missing plugins |
+| `:Lazy update` | Update plugins |
+| `:Lazy sync` | Install missing and update plugins |
+| `:Lazy clean` | Remove unused plugins |
+| `:Lazy check` | Check for updates |
+| `:Lazy log` | Show recent updates |
+| `:Lazy restore` | Restore plugins to lockfile state |
+| `:Lazy profile` | Show plugin load times |
+
+---
+
+## API Reference
+
+### Accessing Plugin APIs
+
+```lua
+-- Most plugins expose their API via require
+local telescope = require("telescope")
+local harpoon = require("harpoon")
+
+-- Use plugin functions
+telescope.load_extension("fzf")
+harpoon:list():add()
+```
+
+### Checking if Plugin is Loaded
+
+```lua
+local has_telescope = pcall(require, "telescope")
+if has_telescope then
+  -- Use telescope
+end
+```
+
+---
+
+## Plugin Configuration Best Practices
+
+1. **Keep plugins in separate files** - Makes configuration more maintainable
+2. **Use lazy loading** - Improves startup time
+3. **Document keymaps** - Always include `desc` parameter
+4. **Pin important plugins** - Use `version` or `commit` for stability
+5. **Test plugin updates** - Review changes before updating
+
+---
+
+## Example: Custom Plugin Addition
+
+```lua
+-- lua/leyland/plugins/my-plugin.lua
+return {
+  "author/my-plugin",
+  event = "VeryLazy",  -- Lazy load after startup
+  dependencies = {
+    "nvim-lua/plenary.nvim",  -- Required dependency
+  },
+  keys = {
+    { "<leader>mp", "<cmd>MyPlugin<cr>", desc = "Open My Plugin" },
+  },
+  opts = {
+    setting1 = true,
+    setting2 = "value",
+  },
+  config = function(_, opts)
+    local plugin = require("my-plugin")
+    plugin.setup(opts)
+    
+    -- Additional configuration
+    vim.api.nvim_create_autocmd("FileType", {
+      pattern = "my-plugin",
+      callback = function()
+        vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = true })
+      end,
+    })
+  end,
+}
+```

@@ -1,0 +1,472 @@
+---
+title: 'nvim-cmp Configuration'
+description: 'Complete reference for nvim-cmp autocompletion configuration'
+---
+
+## Overview
+
+nvim-cmp provides intelligent autocompletion with LSP integration, snippets, and multiple sources.
+
+**Location:** `lua/leyland/plugins/nvim-cmp.lua`
+
+---
+
+## Plugin Specification
+
+```lua
+return {
+  "hrsh7th/nvim-cmp",
+  event = "InsertEnter",
+  dependencies = {
+    "hrsh7th/cmp-buffer",
+    "hrsh7th/cmp-path",
+    {
+      "L3MON4D3/LuaSnip",
+      version = "v2.*",
+      build = "make install_jsregexp",
+    },
+    "saadparwaiz1/cmp_luasnip",
+    "rafamadriz/friendly-snippets",
+    "onsails/lspkind.nvim",
+  },
+}
+```
+
+### Lazy Loading
+
+<ParamField path="event" type="string" default="InsertEnter">
+  Loads nvim-cmp when entering insert mode to improve startup time
+</ParamField>
+
+---
+
+## Dependencies
+
+| Plugin | Purpose |
+|--------|--------|
+| `cmp-buffer` | Completion from buffer text |
+| `cmp-path` | File system path completion |
+| `LuaSnip` | Snippet engine |
+| `cmp_luasnip` | LuaSnip completion source |
+| `friendly-snippets` | Collection of pre-made snippets |
+| `lspkind.nvim` | VS Code-like icons in completion menu |
+
+---
+
+## Configuration
+
+### Snippet Integration
+
+```lua
+snippet = {
+  expand = function(args)
+    require("luasnip").lsp_expand(args.body)
+  end,
+}
+```
+
+Configures LuaSnip as the snippet engine.
+
+### Snippet Loading
+
+```lua
+require("luasnip.loaders.from_vscode").lazy_load()
+```
+
+Lazy loads VS Code-style snippets from `friendly-snippets`.
+
+---
+
+## Keybindings
+
+### Insert Mode Mappings
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<C-k>` | Previous item | Select previous completion suggestion |
+| `<C-j>` | Next item | Select next completion suggestion |
+| `<C-b>` | Scroll docs up | Scroll documentation window up |
+| `<C-f>` | Scroll docs down | Scroll documentation window down |
+| `<C-Space>` | Complete | Manually trigger completion |
+| `<C-e>` | Abort | Close completion menu |
+| `<CR>` | Confirm | Accept selected completion (only if explicitly selected) |
+| `<Tab>` | Next/Expand | Select next item or expand snippet |
+
+### Tab Behavior
+
+```lua
+["<Tab>"] = cmp.mapping(function(fallback)
+  if cmp.visible() then
+    cmp.select_next_item()
+  elseif luasnip.expand_or_jumpable() then
+    luasnip.expand_or_jump()
+  else
+    fallback()
+  end
+end, { "i", "s" })
+```
+
+**Tab key logic:**
+1. If completion menu is open → select next item
+2. If snippet is expandable/jumpable → expand or jump to next placeholder
+3. Otherwise → insert normal tab
+
+---
+
+## Completion Sources
+
+```lua
+sources = cmp.config.sources({
+  { name = "nvim_lsp" },   -- LSP completions (highest priority)
+  { name = "luasnip" },    -- Snippet completions
+  { name = "buffer" },     -- Text from current buffer
+  { name = "path" },       -- File system paths
+})
+```
+
+### Source Priority
+
+Sources are listed in priority order:
+
+1. **nvim_lsp** - Language server completions (functions, variables, types)
+2. **luasnip** - Available snippets
+3. **buffer** - Words from current buffer
+4. **path** - File and directory paths
+
+---
+
+## Completion Sources Details
+
+### LSP Source
+
+**Provides:**
+- Function and method names
+- Variable names
+- Type definitions
+- Import suggestions
+- Context-aware completions
+
+**Enabled by:** `cmp-nvim-lsp` plugin (see [LSP Reference](/reference/lsp))
+
+### Buffer Source
+
+**Provides:**
+- Words from current buffer
+- Useful for prose and documentation
+- Falls back when LSP isn't available
+
+**Configuration:**
+```lua
+{ name = "buffer", option = {
+  get_bufnrs = function()
+    return vim.api.nvim_list_bufs()
+  end
+}}
+```
+
+### Path Source
+
+**Provides:**
+- File path completions
+- Directory completions
+- Relative and absolute paths
+
+**Triggered by:** Typing `/` or `./` or `../`
+
+### LuaSnip Source
+
+**Provides:**
+- Snippet completions from friendly-snippets
+- Custom snippets
+- Language-specific templates
+
+---
+
+## Formatting
+
+### LSPKind Integration
+
+```lua
+formatting = {
+  format = lspkind.cmp_format({
+    maxwidth = 50,
+    ellipsis_char = "...",
+  }),
+}
+```
+
+<ParamField path="formatting.format.maxwidth" type="number" default="50">
+  Maximum width of completion items (truncates longer items)
+</ParamField>
+
+<ParamField path="formatting.format.ellipsis_char" type="string" default="...">
+  Character used for truncation indicator
+</ParamField>
+
+### Completion Menu Icons
+
+lspkind adds VS Code-style icons to completion items:
+
+| Icon | Type |
+|------|------|
+|  | Text |
+|  | Method |
+|  | Function |
+|  | Constructor |
+|  | Field |
+|  | Variable |
+|  | Class |
+|  | Interface |
+|  | Module |
+|  | Property |
+|  | Unit |
+|  | Value |
+|  | Enum |
+|  | Keyword |
+|  | Snippet |
+|  | Color |
+|  | File |
+|  | Reference |
+|  | Folder |
+
+---
+
+## Confirmation Behavior
+
+```lua
+["<CR>"] = cmp.mapping.confirm({ select = false })
+```
+
+<ParamField path="select" type="boolean" default="false">
+  `false` = Only confirms explicitly selected items
+  `true` = Auto-selects first item and confirms
+</ParamField>
+
+With `select = false`, you must explicitly select an item (with `<C-j>`/`<C-k>`) before pressing Enter to accept it. This prevents accidental completions.
+
+---
+
+## API Reference
+
+### Manual Trigger
+
+```lua
+-- Trigger completion manually
+vim.keymap.set("i", "<C-Space>", function()
+  require("cmp").complete()
+end)
+```
+
+### Get Selected Item
+
+```lua
+local cmp = require("cmp")
+local selected = cmp.get_selected_entry()
+if selected then
+  print(selected.source.name)
+end
+```
+
+### Close Completion
+
+```lua
+require("cmp").close()
+```
+
+### Custom Source
+
+```lua
+local cmp = require("cmp")
+
+cmp.register_source("my_source", {
+  complete = function(self, params, callback)
+    callback({
+      { label = "item1" },
+      { label = "item2" },
+    })
+  end,
+})
+
+-- Add to sources
+sources = cmp.config.sources({
+  { name = "my_source" },
+})
+```
+
+---
+
+## Customization Examples
+
+### Auto-confirm First Item
+
+```lua
+mapping = {
+  ["<CR>"] = cmp.mapping.confirm({ select = true }),  -- Auto-select first
+}
+```
+
+### Different Tab Behavior
+
+```lua
+mapping = {
+  ["<Tab>"] = cmp.mapping.select_next_item(),  -- Simple next item
+  ["<S-Tab>"] = cmp.mapping.select_prev_item(),  -- Shift-Tab for previous
+}
+```
+
+### Completion from All Buffers
+
+```lua
+sources = {
+  {
+    name = "buffer",
+    option = {
+      get_bufnrs = function()
+        return vim.api.nvim_list_bufs()
+      end,
+    },
+  },
+}
+```
+
+### Disable Path Completion
+
+```lua
+sources = cmp.config.sources({
+  { name = "nvim_lsp" },
+  { name = "luasnip" },
+  { name = "buffer" },
+  -- Remove path source
+})
+```
+
+### Custom Formatting
+
+```lua
+formatting = {
+  format = function(entry, vim_item)
+    vim_item.kind = string.format("%s %s", vim_item.kind, vim_item.kind)
+    vim_item.menu = ({
+      nvim_lsp = "[LSP]",
+      luasnip = "[Snip]",
+      buffer = "[Buf]",
+      path = "[Path]",
+    })[entry.source.name]
+    return vim_item
+  end,
+}
+```
+
+### Source Priority Control
+
+```lua
+sources = cmp.config.sources({
+  { name = "nvim_lsp", priority = 1000 },
+  { name = "luasnip", priority = 750 },
+  { name = "buffer", priority = 500 },
+  { name = "path", priority = 250 },
+})
+```
+
+---
+
+## Snippets
+
+### Available Snippets
+
+friendly-snippets provides snippets for many languages:
+- JavaScript/TypeScript
+- Python
+- HTML/CSS
+- Lua
+- And many more...
+
+### Using Snippets
+
+1. Start typing snippet trigger
+2. Select snippet from completion menu
+3. Press `<Tab>` to jump to next placeholder
+4. Press `<S-Tab>` to jump to previous placeholder
+
+### Custom Snippets
+
+Add custom snippets in `~/.config/nvim/snippets/`:
+
+```lua
+-- ~/.config/nvim/snippets/lua.lua
+local ls = require("luasnip")
+local s = ls.snippet
+local t = ls.text_node
+local i = ls.insert_node
+
+ls.add_snippets("lua", {
+  s("req", {
+    t('local '),
+    i(1, "module"),
+    t(' = require("'),
+    i(2, "module"),
+    t('")'),
+  }),
+})
+```
+
+Then load in your config:
+
+```lua
+require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets" })
+```
+
+---
+
+## Performance
+
+### Completion Delay
+
+By default, completion triggers as you type. To add delay:
+
+```lua
+cmp.setup({
+  performance = {
+    debounce = 150,  -- 150ms delay
+    throttle = 60,
+  },
+})
+```
+
+### Max Items
+
+```lua
+completion = {
+  max_item_count = 20,  -- Show max 20 items
+}
+```
+
+---
+
+## Troubleshooting
+
+### Completion Not Working
+
+1. Check if LSP is attached: `:LspInfo`
+2. Check cmp sources: `:lua =require('cmp').get_config().sources`
+3. Check keymaps: `:verbose imap <C-Space>`
+
+### No LSP Completions
+
+1. Ensure LSP server is running: `:LspInfo`
+2. Check capabilities: `:lua =vim.lsp.get_active_clients()[1].server_capabilities`
+3. Verify cmp-nvim-lsp is loaded
+
+### Snippets Not Expanding
+
+1. Check if LuaSnip is loaded: `:lua =package.loaded['luasnip']`
+2. Check available snippets: `:lua =require('luasnip').get_snippets()`
+3. Verify friendly-snippets is installed
+
+### Menu Not Appearing
+
+Check completion settings:
+
+```lua
+:lua =require('cmp').get_config().completion
+```

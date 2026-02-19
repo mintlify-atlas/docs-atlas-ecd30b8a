@@ -1,0 +1,612 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for nvim-luffy
+---
+
+## Overview
+
+This guide covers common problems you might encounter with nvim-luffy and how to resolve them.
+
+## Plugin Issues
+
+<AccordionGroup>
+  <Accordion title="Plugins not loading or installing" icon="plug">
+    **Symptoms**: 
+    - Neovim starts but features are missing
+    - Error messages about missing plugins
+    - Plugins showing as "not installed" in `:Lazy`
+    
+    **Solutions**:
+    
+    1. **Sync plugins manually**:
+       ```vim
+       :Lazy sync
+       ```
+    
+    2. **Check for errors**:
+       ```vim
+       :Lazy
+       ```
+       Look for red error messages in the plugin list.
+    
+    3. **Clear plugin cache**:
+       ```bash
+       rm -rf ~/.local/share/nvim/lazy/
+       ```
+       Then restart Neovim and run `:Lazy sync`.
+    
+    4. **Check internet connection**: Some plugins may fail to download if your connection is unstable.
+    
+    5. **View detailed logs**:
+       ```vim
+       :Lazy log
+       ```
+  </Accordion>
+  
+  <Accordion title="Plugin updates breaking functionality" icon="arrow-rotate-right">
+    **Symptoms**:
+    - Features that worked before suddenly stop working
+    - Error messages after running `:Lazy update`
+    
+    **Solutions**:
+    
+    1. **Check recent updates**:
+       ```vim
+       :Lazy log
+       ```
+    
+    2. **Rollback a specific plugin**:
+       - Open `:Lazy`
+       - Navigate to the problematic plugin
+       - Press `X` to see commits
+       - Press `r` on an older commit to rollback
+    
+    3. **Pin a plugin version** (in your config):
+       ```lua
+       {
+         "author/plugin-name",
+         version = "v1.2.3",  -- Pin to specific version
+       }
+       ```
+    
+    4. **Restore all plugins**:
+       ```vim
+       :Lazy restore
+       ```
+  </Accordion>
+  
+  <Accordion title="Slow startup time" icon="clock">
+    **Symptoms**:
+    - Neovim takes several seconds to start
+    - Lag when opening files
+    
+    **Solutions**:
+    
+    1. **Profile startup**:
+       ```vim
+       :Lazy profile
+       ```
+       This shows which plugins are slow to load.
+    
+    2. **Add lazy loading**: Edit plugin specs to load on demand:
+       ```lua
+       {
+         "author/plugin-name",
+         event = "VeryLazy",  -- Load after startup
+       }
+       ```
+    
+    3. **Check for heavy plugins**: Plugins like Treesitter or LSP can be slow on first load.
+    
+    4. **Disable unused plugins**: Comment out plugins you don't use:
+       ```lua
+       -- {
+       --   "unused/plugin",
+       -- },
+       ```
+       Then run `:Lazy clean`.
+  </Accordion>
+  
+  <Accordion title="Plugin configuration not applying" icon="gear">
+    **Symptoms**:
+    - Changes to plugin config don't take effect
+    - Default behavior persists despite custom config
+    
+    **Solutions**:
+    
+    1. **Verify config syntax**: Check for Lua syntax errors:
+       ```vim
+       :messages
+       ```
+    
+    2. **Ensure config is being called**: Add a print statement:
+       ```lua
+       config = function()
+         print("Config running!")
+         -- rest of config
+       end
+       ```
+    
+    3. **Check plugin documentation**: Ensure option names are correct.
+    
+    4. **Restart Neovim**: Some changes require a full restart, not just `:source`.
+    
+    5. **Clear plugin state**:
+       ```bash
+       rm -rf ~/.local/state/nvim/
+       ```
+  </Accordion>
+</AccordionGroup>
+
+## LSP Issues
+
+<AccordionGroup>
+  <Accordion title="Language server not starting" icon="code">
+    **Symptoms**:
+    - No autocomplete, diagnostics, or go-to-definition
+    - `:LspInfo` shows no attached clients
+    
+    **Solutions**:
+    
+    1. **Check if server is installed**:
+       ```vim
+       :Mason
+       ```
+       Look for the server with a ✓ icon.
+    
+    2. **Install missing server**:
+       ```vim
+       :MasonInstall <server-name>
+       ```
+    
+    3. **Check LSP status**:
+       ```vim
+       :LspInfo
+       ```
+       This shows which servers should be running.
+    
+    4. **Restart LSP**:
+       ```vim
+       :LspRestart
+       ```
+    
+    5. **Check for errors**:
+       ```vim
+       :messages
+       ```
+    
+    6. **Verify server in config**: Check `lua/leyland/plugins/lsp/mason.lua` includes your server.
+  </Accordion>
+  
+  <Accordion title="Diagnostics not showing" icon="triangle-exclamation">
+    **Symptoms**:
+    - Code has errors but no underlines/signs appear
+    - `:LspInfo` shows server is attached
+    
+    **Solutions**:
+    
+    1. **Check diagnostic configuration**:
+       ```vim
+       :lua print(vim.inspect(vim.diagnostic.config()))
+       ```
+    
+    2. **Enable diagnostics**:
+       ```lua
+       vim.diagnostic.config({
+         virtual_text = true,
+         signs = true,
+         underline = true,
+       })
+       ```
+    
+    3. **Check sign column**: Ensure it's enabled in `options.lua`:
+       ```lua
+       opt.signcolumn = "yes"
+       ```
+    
+    4. **View diagnostics manually**:
+       ```vim
+       :lua vim.diagnostic.show()
+       ```
+  </Accordion>
+  
+  <Accordion title="Formatting not working" icon="paintbrush">
+    **Symptoms**:
+    - Code doesn't format on save
+    - Manual format (`<leader>mp`) does nothing
+    
+    **Solutions**:
+    
+    1. **Check formatter installation**:
+       ```vim
+       :Mason
+       ```
+    
+    2. **Install missing formatter**:
+       ```vim
+       :MasonInstall <formatter-name>
+       ```
+    
+    3. **Check conform.nvim status**:
+       ```vim
+       :ConformInfo
+       ```
+    
+    4. **Verify filetype mapping** in `lua/leyland/plugins/formatting.lua`:
+       ```lua
+       formatters_by_ft = {
+         lua = { "stylua" },
+         python = { "black" },
+         -- Add your filetype here
+       }
+       ```
+    
+    5. **Increase timeout**:
+       ```lua
+       format_on_save = {
+         timeout_ms = 5000,  -- Increase from 3000
+       }
+       ```
+    
+    6. **Format manually to see errors**:
+       ```vim
+       :lua require("conform").format()
+       ```
+  </Accordion>
+  
+  <Accordion title="LSP consuming too much CPU/memory" icon="microchip">
+    **Symptoms**:
+    - System slowdown when editing
+    - High CPU usage in task manager
+    
+    **Solutions**:
+    
+    1. **Restart the LSP server**:
+       ```vim
+       :LspRestart
+       ```
+    
+    2. **Reduce diagnostic frequency**: Edit LSP config:
+       ```lua
+       vim.diagnostic.config({
+         update_in_insert = false,  -- Don't update during insert
+       })
+       ```
+    
+    3. **Limit workspace scanning**: For large projects:
+       ```lua
+       lspconfig.ts_ls.setup({
+         settings = {
+           typescript = {
+             maxTsServerMemory = 4096,
+           },
+         },
+       })
+       ```
+    
+    4. **Exclude directories**: Add to project root:
+       ```json
+       // .gitignore or .ignore
+       node_modules/
+       dist/
+       build/
+       ```
+  </Accordion>
+</AccordionGroup>
+
+## Configuration Issues
+
+<AccordionGroup>
+  <Accordion title="Changes not taking effect" icon="file-code">
+    **Symptoms**:
+    - Edits to config files don't apply
+    - Old behavior persists
+    
+    **Solutions**:
+    
+    1. **Restart Neovim**: Full restart is often necessary.
+    
+    2. **Check for syntax errors**:
+       ```vim
+       :messages
+       ```
+    
+    3. **Verify file is being loaded**: Add print statement:
+       ```lua
+       print("Config loaded!")
+       ```
+    
+    4. **Check module path**: Ensure `require()` paths are correct:
+       ```lua
+       -- Correct
+       require("leyland.plugins.example")
+       
+       -- Wrong
+       require("plugins.example")
+       ```
+    
+    5. **Clear Neovim cache**:
+       ```bash
+       rm -rf ~/.local/state/nvim/
+       rm -rf ~/.cache/nvim/
+       ```
+  </Accordion>
+  
+  <Accordion title="Colorscheme not applying" icon="palette">
+    **Symptoms**:
+    - Wrong colorscheme loads
+    - Colors look broken or default
+    
+    **Solutions**:
+    
+    1. **Check colorscheme is installed**:
+       ```vim
+       :Lazy
+       ```
+    
+    2. **Verify colorscheme name**: Check the plugin's documentation.
+    
+    3. **Apply manually to test**:
+       ```vim
+       :colorscheme bamboo
+       ```
+    
+    4. **Check priority**: Ensure high priority in config:
+       ```lua
+       {
+         "theme/plugin",
+         priority = 1000,
+       }
+       ```
+    
+    5. **Enable termguicolors** in `options.lua`:
+       ```lua
+       opt.termguicolors = true
+       ```
+  </Accordion>
+  
+  <Accordion title="Keybindings not working" icon="keyboard">
+    **Symptoms**:
+    - Custom keybindings don't trigger
+    - Default behavior occurs instead
+    
+    **Solutions**:
+    
+    1. **Check for conflicts**: View all keymaps:
+       ```vim
+       :nmap
+       :imap
+       :vmap
+       ```
+    
+    2. **Test keymap definition**:
+       ```lua
+       vim.keymap.set("n", "<leader>test", function()
+         print("Keymap works!")
+       end)
+       ```
+    
+    3. **Verify leader key is set** in `keymaps.lua`:
+       ```lua
+       vim.g.mapleader = " "
+       ```
+    
+    4. **Check mode**: Ensure you're in the correct mode (normal, insert, visual).
+    
+    5. **Plugin overriding**: Some plugins set their own keymaps. Check plugin config.
+  </Accordion>
+</AccordionGroup>
+
+## General Issues
+
+<AccordionGroup>
+  <Accordion title="Neovim crashes or freezes" icon="skull">
+    **Symptoms**:
+    - Neovim becomes unresponsive
+    - Immediate crash on startup
+    
+    **Solutions**:
+    
+    1. **Start with minimal config**:
+       ```bash
+       nvim --clean
+       ```
+    
+    2. **Check for infinite loops** in config files.
+    
+    3. **Disable problematic plugin**: Comment out in config and run `:Lazy clean`.
+    
+    4. **Update Neovim**:
+       ```bash
+       # On Ubuntu/Debian
+       sudo apt update && sudo apt upgrade neovim
+       
+       # On macOS
+       brew upgrade neovim
+       ```
+    
+    5. **Check system resources**: Ensure adequate RAM/CPU available.
+  </Accordion>
+  
+  <Accordion title="Error messages on startup" icon="circle-exclamation">
+    **Symptoms**:
+    - Red error text when opening Neovim
+    - Press ENTER prompt appears
+    
+    **Solutions**:
+    
+    1. **Read the error message**: It usually indicates the problem.
+    
+    2. **View full message log**:
+       ```vim
+       :messages
+       ```
+    
+    3. **Check for typos** in config files.
+    
+    4. **Verify plugin names**: Ensure GitHub paths are correct.
+    
+    5. **Missing dependencies**: Some plugins require external tools:
+       ```bash
+       # Example: telescope.nvim requires ripgrep
+       brew install ripgrep
+       ```
+  </Accordion>
+  
+  <Accordion title="File explorer (nvim-tree) not working" icon="folder-tree">
+    **Symptoms**:
+    - nvim-tree doesn't open
+    - File browser shows errors
+    
+    **Solutions**:
+    
+    1. **Check nvim-tree is installed**:
+       ```vim
+       :Lazy
+       ```
+    
+    2. **Try opening manually**:
+       ```vim
+       :NvimTreeToggle
+       ```
+    
+    3. **Check for keybinding**: Default should be set in plugin config.
+    
+    4. **Reinstall nvim-tree**:
+       ```vim
+       :Lazy clean
+       :Lazy sync
+       ```
+  </Accordion>
+  
+  <Accordion title="Clipboard not working" icon="clipboard">
+    **Symptoms**:
+    - Can't copy to/from system clipboard
+    - Yanked text not available outside Neovim
+    
+    **Solutions**:
+    
+    1. **Install clipboard provider**:
+       ```bash
+       # On Ubuntu/Debian
+       sudo apt install xclip
+       
+       # On macOS (usually built-in)
+       # No action needed
+       ```
+    
+    2. **Verify clipboard option** in `options.lua`:
+       ```lua
+       opt.clipboard:append("unnamedplus")
+       ```
+    
+    3. **Check provider health**:
+       ```vim
+       :checkhealth
+       ```
+       Look for clipboard-related issues.
+    
+    4. **Try explicit register**: Use `"+y` to yank to clipboard.
+  </Accordion>
+</AccordionGroup>
+
+## Diagnostic Commands
+
+Use these commands to gather information about issues:
+
+```vim
+:checkhealth          " Comprehensive health check
+:Lazy                 " View plugin status
+:Mason                " View LSP/tool status
+:LspInfo              " View LSP server status
+:messages             " View error messages
+:Lazy profile         " Profile startup time
+:Lazy log             " View plugin update log
+:ConformInfo          " View formatter status
+```
+
+## Getting Help
+
+If you can't resolve an issue:
+
+<Steps>
+  <Step title="Gather information">
+    Run diagnostic commands and note:
+    - Exact error message
+    - Steps to reproduce
+    - Neovim version (`:version`)
+    - Operating system
+  </Step>
+  
+  <Step title="Check plugin documentation">
+    Visit the GitHub repo for the problematic plugin and check:
+    - README
+    - Issues tab
+    - Wiki/documentation
+  </Step>
+  
+  <Step title="Search for similar issues">
+    Search the nvim-luffy repository issues:
+    - [GitHub Issues](https://github.com/yourusername/nvim-luffy/issues)
+  </Step>
+  
+  <Step title="Create an issue">
+    If no solution exists, open a new issue:
+    
+    **Include**:
+    - Detailed description
+    - Steps to reproduce
+    - Error messages (from `:messages`)
+    - System information
+    - Minimal config to reproduce (if possible)
+  </Step>
+</Steps>
+
+## Preventive Maintenance
+
+<CardGroup cols={2}>
+  <Card title="Regular Updates" icon="arrow-rotate-right">
+    Update plugins regularly:
+    
+    ```vim
+    :Lazy update
+    :Mason update
+    ```
+  </Card>
+  
+  <Card title="Clean Unused Plugins" icon="trash">
+    Remove plugins you don't use:
+    
+    ```vim
+    :Lazy clean
+    ```
+  </Card>
+  
+  <Card title="Check Health" icon="heart-pulse">
+    Run health checks periodically:
+    
+    ```vim
+    :checkhealth
+    ```
+  </Card>
+  
+  <Card title="Backup Config" icon="floppy-disk">
+    Use git to track changes:
+    
+    ```bash
+    git add .
+    git commit -m "Update config"
+    ```
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Customization Guide" icon="sliders" href="/guides/customization">
+    Learn how to customize nvim-luffy
+  </Card>
+  <Card title="Adding Plugins" icon="plug" href="/guides/adding-plugins">
+    Add new plugins to extend functionality
+  </Card>
+</CardGroup>

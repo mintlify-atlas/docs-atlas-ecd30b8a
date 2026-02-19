@@ -1,0 +1,464 @@
+---
+title: 'LSP Configuration'
+description: 'Language Server Protocol setup with Mason and nvim-lspconfig'
+---
+
+## Overview
+
+nvim-luffy provides a complete LSP setup with automatic language server installation, intelligent code completion, and diagnostic reporting.
+
+## mason.nvim
+
+[mason.nvim](https://github.com/williamboman/mason.nvim) is a portable package manager for LSP servers, formatters, and linters.
+
+### Configuration
+
+Located in `lua/leyland/plugins/lsp/mason.lua:1-52`:
+
+```lua
+return {
+  {
+    "williamboman/mason-lspconfig.nvim",
+    opts = {
+      ensure_installed = {
+        "ts_ls",
+        "html",
+        "cssls",
+        "tailwindcss",
+        "svelte",
+        "lua_ls",
+        "graphql",
+        "emmet_ls",
+        "prismals",
+        "pyright",
+        "eslint",
+      },
+    },
+    dependencies = {
+      {
+        "williamboman/mason.nvim",
+        opts = {
+          ui = {
+            icons = {
+              package_installed = "✓",
+              package_pending = "➜",
+              package_uninstalled = "✗",
+            },
+          },
+        },
+      },
+      "neovim/nvim-lspconfig",
+    },
+  },
+  {
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+    opts = {
+      ensure_installed = {
+        "prettier",
+        "stylua",
+        "isort",
+        "black",
+        "pylint",
+        "eslint_d",
+      },
+    },
+    dependencies = {
+      "williamboman/mason.nvim",
+    },
+  },
+}
+```
+
+### Installed Language Servers
+
+<CardGroup cols={2}>
+  <Card title="TypeScript/JavaScript" icon="js">
+    **ts_ls** - TypeScript Language Server
+    
+    Full TypeScript and JavaScript support with IntelliSense
+  </Card>
+  
+  <Card title="HTML" icon="html5">
+    **html** - HTML Language Server
+    
+    HTML completions, validation, and formatting
+  </Card>
+  
+  <Card title="CSS" icon="css3-alt">
+    **cssls** - CSS Language Server
+    
+    CSS/SCSS/LESS support with completions
+  </Card>
+  
+  <Card title="Tailwind CSS" icon="wind">
+    **tailwindcss** - Tailwind CSS IntelliSense
+    
+    Class name completions and previews
+  </Card>
+  
+  <Card title="Svelte" icon="code">
+    **svelte** - Svelte Language Server
+    
+    Full Svelte framework support
+  </Card>
+  
+  <Card title="Lua" icon="moon">
+    **lua_ls** - Lua Language Server
+    
+    Lua with Neovim API completions
+  </Card>
+  
+  <Card title="GraphQL" icon="database">
+    **graphql** - GraphQL Language Server
+    
+    Schema validation and completions
+  </Card>
+  
+  <Card title="Emmet" icon="wand-magic-sparkles">
+    **emmet_ls** - Emmet Language Server
+    
+    HTML/CSS abbreviation expansion
+  </Card>
+  
+  <Card title="Prisma" icon="database">
+    **prismals** - Prisma Language Server
+    
+    Prisma schema support
+  </Card>
+  
+  <Card title="Python" icon="python">
+    **pyright** - Python Language Server
+    
+    Python type checking and completions
+  </Card>
+  
+  <Card title="ESLint" icon="check">
+    **eslint** - JavaScript Linter
+    
+    Linting and auto-fixing
+  </Card>
+</CardGroup>
+
+### Installed Tools
+
+<Tabs>
+  <Tab title="Formatters">
+    | Tool | Languages | Description |
+    |------|-----------|-------------|
+    | **prettier** | JS, TS, HTML, CSS, JSON, Markdown | Multi-language formatter |
+    | **stylua** | Lua | Opinionated Lua formatter |
+    | **black** | Python | Uncompromising Python formatter |
+    | **isort** | Python | Python import sorter |
+  </Tab>
+  
+  <Tab title="Linters">
+    | Tool | Languages | Description |
+    |------|-----------|-------------|
+    | **eslint_d** | JavaScript, TypeScript | Fast ESLint daemon |
+    | **pylint** | Python | Python code analysis |
+  </Tab>
+</Tabs>
+
+### Managing Servers
+
+<Steps>
+  <Step title="Open Mason UI">
+    ```vim
+    :Mason
+    ```
+  </Step>
+  
+  <Step title="Navigate the interface">
+    - `i` - Install server under cursor
+    - `u` - Update server under cursor
+    - `X` - Uninstall server under cursor
+    - `/` - Search
+    - `g?` - Show help
+  </Step>
+  
+  <Step title="Status indicators">
+    - ✓ - Installed
+    - ➜ - Pending installation
+    - ✗ - Not installed
+  </Step>
+</Steps>
+
+## nvim-lspconfig
+
+[nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) provides configurations for Neovim's built-in LSP client.
+
+### Configuration
+
+Located in `lua/leyland/plugins/lsp/lsp.lua:1-19`:
+
+```lua
+return {
+  "hrsh7th/cmp-nvim-lsp",
+  event = { "BufReadPre", "BufNewFile" },
+  dependencies = {
+    { "antosha417/nvim-lsp-file-operations", config = true },
+    { "folke/lazydev.nvim", opts = {} },
+  },
+  config = function()
+    local cmp_nvim_lsp = require("cmp_nvim_lsp")
+    
+    -- Enable autocompletion for all LSP servers
+    local capabilities = cmp_nvim_lsp.default_capabilities()
+    
+    vim.lsp.config("*", {
+      capabilities = capabilities,
+    })
+  end,
+}
+```
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Auto-completion" icon="keyboard">
+    Intelligent code completions from LSP
+  </Card>
+  
+  <Card title="File Operations" icon="file">
+    LSP-aware file rename/move operations
+  </Card>
+  
+  <Card title="Lua Development" icon="laptop-code">
+    Enhanced Lua editing with lazydev.nvim
+  </Card>
+  
+  <Card title="Lazy Loading" icon="bolt">
+    Load only when opening files
+  </Card>
+</CardGroup>
+
+## nvim-cmp
+
+[nvim-cmp](https://github.com/hrsh7th/nvim-cmp) is a powerful autocompletion engine.
+
+### Configuration
+
+Located in `lua/leyland/plugins/nvim-cmp.lua:1-69`:
+
+```lua
+return {
+  "hrsh7th/nvim-cmp",
+  event = "InsertEnter",
+  dependencies = {
+    "hrsh7th/cmp-buffer",
+    "hrsh7th/cmp-path",
+    {
+      "L3MON4D3/LuaSnip",
+      version = "v2.*",
+      build = "make install_jsregexp",
+    },
+    "saadparwaiz1/cmp_luasnip",
+    "rafamadriz/friendly-snippets",
+    "onsails/lspkind.nvim",
+  },
+}
+```
+
+### Completion Sources
+
+<Tabs>
+  <Tab title="LSP">
+    **nvim_lsp** - Language Server Protocol
+    
+    Intelligent completions from language servers:
+    - Functions, methods, variables
+    - Type information
+    - Documentation
+    - Signatures
+  </Tab>
+  
+  <Tab title="Snippets">
+    **luasnip** - Snippet engine
+    
+    Pre-defined code snippets:
+    - Common patterns
+    - Boilerplate code
+    - Language constructs
+    - Custom snippets
+    
+    Powered by [friendly-snippets](https://github.com/rafamadriz/friendly-snippets)
+  </Tab>
+  
+  <Tab title="Buffer">
+    **buffer** - Current buffer words
+    
+    Completions from text in open buffers:
+    - Variable names
+    - Function names
+    - Any text you've typed
+  </Tab>
+  
+  <Tab title="Path">
+    **path** - File system paths
+    
+    File and directory completions:
+    - Relative paths
+    - Absolute paths
+    - Directory navigation
+  </Tab>
+</Tabs>
+
+### Keymaps
+
+<Tabs>
+  <Tab title="Navigation">
+    | Key | Action | Description |
+    |-----|--------|-------------|
+    | `<C-k>` | Previous | Select previous completion |
+    | `<C-j>` | Next | Select next completion |
+    | `<Tab>` | Next/Expand | Next item or expand snippet |
+    | `<C-Space>` | Complete | Show completions manually |
+  </Tab>
+  
+  <Tab title="Documentation">
+    | Key | Action | Description |
+    |-----|--------|-------------|
+    | `<C-b>` | Scroll up | Scroll docs up |
+    | `<C-f>` | Scroll down | Scroll docs down |
+  </Tab>
+  
+  <Tab title="Confirmation">
+    | Key | Action | Description |
+    |-----|--------|-------------|
+    | `<CR>` | Confirm | Accept selected completion |
+    | `<C-e>` | Abort | Close completion menu |
+  </Tab>
+</Tabs>
+
+### Visual Features
+
+**lspkind.nvim** integration provides VS Code-like pictograms:
+
+- 🔧 Function
+- 📦 Module
+- 📝 Variable
+- 🔤 Text
+- 📄 File
+- And many more...
+
+### Completion Behavior
+
+```lua
+mapping = cmp.mapping.preset.insert({
+  ["<C-k>"] = cmp.mapping.select_prev_item(),
+  ["<C-j>"] = cmp.mapping.select_next_item(),
+  ["<C-Space>"] = cmp.mapping.complete(),
+  ["<CR>"] = cmp.mapping.confirm({ select = false }),
+  ["<Tab>"] = cmp.mapping(function(fallback)
+    if cmp.visible() then
+      cmp.select_next_item()
+    elseif luasnip.expand_or_jumpable() then
+      luasnip.expand_or_jump()
+    else
+      fallback()
+    end
+  end, { "i", "s" }),
+})
+```
+
+## lazydev.nvim
+
+[lazydev.nvim](https://github.com/folke/lazydev.nvim) configures Lua LSP for Neovim plugin development.
+
+### Features
+
+- **Neovim API completions** - Full `vim.*` API
+- **Plugin development** - Type checking for plugins
+- **Documentation** - Inline documentation for Neovim APIs
+- **Auto-configuration** - Works out of the box
+
+## trouble.nvim
+
+[trouble.nvim](https://github.com/folke/trouble.nvim) provides a beautiful list for diagnostics, references, and more.
+
+### Configuration
+
+Located in `lua/leyland/plugins/trouble.lua:1-8`:
+
+```lua
+return {
+  "folke/trouble.nvim",
+  dependencies = { "nvim-tree/nvim-web-devicons" },
+  opts = {},
+  keys = {
+    { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Toggle Trouble" },
+  },
+}
+```
+
+### Usage
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<leader>xx` | Toggle Trouble | Show/hide diagnostics panel |
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Diagnostics List" icon="list">
+    All errors, warnings, and hints in one place
+  </Card>
+  
+  <Card title="Quick Navigation" icon="arrows-up-down">
+    Jump to issues instantly
+  </Card>
+  
+  <Card title="Beautiful UI" icon="palette">
+    Clean, organized display
+  </Card>
+  
+  <Card title="Multi-file" icon="files">
+    See issues across your entire project
+  </Card>
+</CardGroup>
+
+## LSP Workflow
+
+<Steps>
+  <Step title="Open a file">
+    LSP servers auto-start based on file type
+  </Step>
+  
+  <Step title="Start typing">
+    Get intelligent completions with `<C-Space>`
+  </Step>
+  
+  <Step title="See diagnostics">
+    Errors and warnings appear inline
+  </Step>
+  
+  <Step title="View all issues">
+    Press `<leader>xx` to open Trouble
+  </Step>
+  
+  <Step title="Format code">
+    Press `<leader>mp` to format with conform.nvim
+  </Step>
+</Steps>
+
+## Additional LSP Features
+
+### File Operations
+
+**nvim-lsp-file-operations** provides LSP-aware file operations:
+
+- Rename files and update imports automatically
+- Move files and update references
+- Delete files and clean up imports
+
+### Auto Installation
+
+All configured language servers install automatically on first startup via mason-tool-installer.nvim.
+
+<Tip>
+**Adding New Servers:** Add server names to `ensure_installed` in `mason.lua:6-18` and restart Neovim.
+</Tip>
+
+<Warning>
+**Internet Required:** Mason downloads servers from the internet. First startup requires an active connection.
+</Warning>

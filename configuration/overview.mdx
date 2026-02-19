@@ -1,0 +1,124 @@
+---
+title: Configuration Overview
+description: Understanding nvim-luffy's configuration structure and customization
+---
+
+# Configuration Overview
+
+nvim-luffy uses a modular configuration structure organized under the `lua/leyland/` namespace. This approach keeps the configuration clean, maintainable, and easy to customize.
+
+## Configuration Structure
+
+The main entry point is `init.lua` at the root, which loads three core modules:
+
+```lua title="init.lua"
+require("leyland.core")
+require("leyland.lazy")
+require("leyland.lsp")
+```
+
+### Core Configuration
+
+The `lua/leyland/core/` directory contains fundamental Neovim settings:
+
+```lua title="lua/leyland/core/init.lua"
+require("leyland.core.options")
+require("leyland.core.keymaps")
+require("leyland.core.autocommands")
+```
+
+- **options.lua** - Editor options (appearance, indentation, search, etc.)
+- **keymaps.lua** - Core keyboard shortcuts and leader key configuration
+- **autocommands.lua** - Automatic commands triggered by events
+
+### Plugin Management
+
+The `lua/leyland/lazy.lua` file configures the lazy.nvim plugin manager, which handles all plugin installations and loading.
+
+### LSP Configuration
+
+The `lua/leyland/lsp.lua` file sets up Language Server Protocol integration for code intelligence features.
+
+## Module Organization
+
+The configuration follows this directory structure:
+
+```
+lua/leyland/
+├── core/
+│   ├── init.lua           # Loads core modules
+│   ├── options.lua        # Editor options
+│   ├── keymaps.lua        # Core keybindings
+│   └── autocommands.lua   # Auto commands
+├── plugins/               # Plugin configurations
+├── lazy.lua              # Plugin manager setup
+└── lsp.lua               # LSP configuration
+```
+
+## Customizing Your Config
+
+To customize nvim-luffy, you can modify files in the appropriate locations:
+
+### Changing Editor Options
+
+Edit `lua/leyland/core/options.lua` to adjust editor behavior:
+
+```lua
+vim.opt.tabstop = 4        -- Change tab width
+vim.opt.wrap = true        -- Enable line wrapping
+vim.opt.relativenumber = false  -- Disable relative line numbers
+```
+
+See the [Options](/configuration/options) page for all available settings.
+
+### Adding Custom Keymaps
+
+Add your keybindings in `lua/leyland/core/keymaps.lua`:
+
+```lua
+vim.keymap.set("n", "<leader>w", "<cmd>w<CR>", { desc = "Save file" })
+```
+
+See the [Keymaps](/configuration/keymaps) page for existing shortcuts.
+
+### Creating Autocommands
+
+Add automatic behaviors in `lua/leyland/core/autocommands.lua`:
+
+```lua
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.lua",
+  callback = function()
+    -- Format on save
+  end,
+})
+```
+
+See the [Autocommands](/configuration/autocommands) page for existing autocommands.
+
+## Configuration Pages
+
+Explore detailed documentation for each configuration area:
+
+<CardGroup cols={2}>
+  <Card title="Options" icon="sliders" href="/configuration/options">
+    Editor options and settings
+  </Card>
+  <Card title="Keymaps" icon="keyboard" href="/configuration/keymaps">
+    Keyboard shortcuts and leader key
+  </Card>
+  <Card title="Autocommands" icon="bolt" href="/configuration/autocommands">
+    Automatic commands and behaviors
+  </Card>
+  <Card title="Plugins" icon="puzzle-piece" href="/plugins/overview">
+    Plugin configurations
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+- Keep your customizations organized in the appropriate files
+- Use descriptive names for keymaps with the `desc` option
+- Comment your configuration changes for future reference
+- Test changes incrementally
+- Back up your configuration with version control

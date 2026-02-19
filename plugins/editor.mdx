@@ -1,0 +1,300 @@
+---
+title: 'Editor Enhancement Plugins'
+description: 'Syntax highlighting, formatting, and editor behavior plugins'
+---
+
+## Overview
+
+nvim-luffy includes powerful editor enhancement plugins that provide modern IDE features like syntax highlighting, code formatting, automatic pairing, and fast navigation.
+
+## nvim-treesitter
+
+[nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) provides advanced syntax highlighting and code understanding using tree-sitter parsers.
+
+### Configuration
+
+Located in `lua/leyland/plugins/treesitter.lua:1-33`:
+
+```lua
+return {
+  "nvim-treesitter/nvim-treesitter",
+  branch = "master",
+  event = { "BufReadPre", "BufNewFile" },
+  build = ":TSUpdate",
+  config = function()
+    require("nvim-treesitter").setup({
+      ensure_installed = {
+        "json",
+        "javascript",
+        "typescript",
+        "tsx",
+        "yaml",
+        "html",
+        "css",
+        "prisma",
+        "markdown",
+        "markdown_inline",
+        "svelte",
+        "graphql",
+        "bash",
+        "lua",
+        "vim",
+        "dockerfile",
+        "gitignore",
+        "query",
+        "vimdoc",
+        "c",
+      },
+    })
+    vim.treesitter.language.register("bash", "zsh")
+  end,
+}
+```
+
+### Supported Languages
+
+<CardGroup cols={3}>
+  <Card title="Web Development" icon="code">
+    JavaScript, TypeScript, TSX, HTML, CSS, Svelte
+  </Card>
+  
+  <Card title="Configuration" icon="gear">
+    JSON, YAML, TOML, Dockerfile
+  </Card>
+  
+  <Card title="Scripting" icon="terminal">
+    Lua, Bash, Zsh, Python
+  </Card>
+  
+  <Card title="Data" icon="database">
+    Prisma, GraphQL, SQL
+  </Card>
+  
+  <Card title="Documentation" icon="book">
+    Markdown, Vimdoc
+  </Card>
+  
+  <Card title="Systems" icon="microchip">
+    C, Git, Gitignore
+  </Card>
+</CardGroup>
+
+### Features
+
+- **Incremental parsing** - Fast, accurate syntax highlighting
+- **Code folding** - Smart code block folding
+- **Text objects** - Enhanced text object selection
+- **Syntax-aware navigation** - Jump between functions, classes, etc.
+
+## nvim-autopairs
+
+[nvim-autopairs](https://github.com/windwp/nvim-autopairs) automatically closes brackets, quotes, and other paired characters.
+
+### Configuration
+
+Located in `lua/leyland/plugins/autopairs.lua:1-30`:
+
+```lua
+return {
+  "windwp/nvim-autopairs",
+  event = { "InsertEnter" },
+  dependencies = {
+    "hrsh7th/nvim-cmp",
+  },
+  config = function()
+    local autopairs = require("nvim-autopairs")
+
+    autopairs.setup({
+      check_ts = true, -- enable treesitter
+      ts_config = {
+        lua = { "string" },
+        javascript = { "template_string" },
+        java = false,
+      },
+    })
+
+    -- Integration with nvim-cmp
+    local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+    local cmp = require("cmp")
+    cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+  end,
+}
+```
+
+### Features
+
+- **Smart pairing** - Automatically inserts closing brackets, quotes, etc.
+- **Treesitter integration** - Context-aware pairing (e.g., no pairing inside strings)
+- **Completion integration** - Works seamlessly with nvim-cmp
+- **Language-specific rules** - Different behavior for different languages
+
+### Paired Characters
+
+- Brackets: `()`, `[]`, `{}`
+- Quotes: `''`, `""`, `` ` ` ``
+- HTML tags: `<div>` → `<div></div>`
+
+## flash.nvim
+
+[flash.nvim](https://github.com/folke/flash.nvim) provides lightning-fast navigation with highlighted jump points.
+
+### Configuration
+
+Located in `lua/leyland/plugins/flash.lua:1-36`:
+
+```lua
+return {
+  "folke/flash.nvim",
+  event = "VeryLazy",
+  opts = {
+    modes = {
+      char = {
+        char_actions = function(motion)
+          return {
+            [";"] = "next",
+            [","] = "prev",
+          }
+        end,
+      },
+    },
+  },
+}
+```
+
+### Keymaps
+
+<Tabs>
+  <Tab title="Normal Mode">
+    | Key | Action | Description |
+    |-----|--------|-------------|
+    | `s` | Flash jump | Jump to any visible location |
+    | `S` | Flash treesitter | Jump to treesitter nodes |
+    | `<C-Space>` | Incremental selection | Expand selection using treesitter |
+  </Tab>
+  
+  <Tab title="Operator Mode">
+    | Key | Action | Description |
+    |-----|--------|-------------|
+    | `r` | Remote flash | Remote operations |
+    | `R` | Treesitter search | Search treesitter nodes |
+  </Tab>
+  
+  <Tab title="Command Mode">
+    | Key | Action | Description |
+    |-----|--------|-------------|
+    | `<C-s>` | Toggle flash | Toggle flash in command-line |
+  </Tab>
+</Tabs>
+
+### Usage
+
+1. Press `s` in normal mode
+2. Type the first character(s) of your target
+3. Flash highlights all matches with unique labels
+4. Type the label to jump instantly
+
+### Character Motion
+
+- `;` - Jump to next match
+- `,` - Jump to previous match
+
+## conform.nvim
+
+[conform.nvim](https://github.com/stevearc/conform.nvim) provides fast, asynchronous code formatting with multiple formatter support.
+
+### Configuration
+
+Located in `lua/leyland/plugins/formatting.lua:1-39`:
+
+```lua
+return {
+  "stevearc/conform.nvim",
+  event = { "BufReadPre", "BufNewFile" },
+  config = function()
+    local conform = require("conform")
+
+    conform.setup({
+      formatters_by_ft = {
+        javascript = { "prettier" },
+        typescript = { "prettier" },
+        javascriptreact = { "prettier" },
+        typescriptreact = { "prettier" },
+        svelte = { "prettier" },
+        css = { "prettier" },
+        html = { "prettier" },
+        json = { "prettier" },
+        yaml = { "prettier" },
+        markdown = { "prettier" },
+        graphql = { "prettier" },
+        liquid = { "prettier" },
+        lua = { "stylua" },
+        python = { "isort", "black" },
+      },
+      format_on_save = {
+        lsp_fallback = true,
+        async = false,
+        timeout_ms = 3000,
+      },
+    })
+  end,
+}
+```
+
+### Formatters by Language
+
+<CardGroup cols={2}>
+  <Card title="Web (Prettier)" icon="code">
+    JavaScript, TypeScript, HTML, CSS, JSON, Markdown
+  </Card>
+  
+  <Card title="Lua (Stylua)" icon="moon">
+    Lua formatting with opinionated defaults
+  </Card>
+  
+  <Card title="Python (Black + isort)" icon="python">
+    Code formatting with import sorting
+  </Card>
+  
+  <Card title="React (Prettier)" icon="react">
+    JSX/TSX with proper formatting
+  </Card>
+</CardGroup>
+
+### Keymaps
+
+| Mode | Key | Action | Description |
+|------|-----|--------|-------------|
+| Normal/Visual | `<leader>mp` | Format | Format file or selection |
+
+Located in `lua/leyland/plugins/formatting.lua:31-37`.
+
+### Features
+
+- **Format on save** - Automatically format files when saving
+- **LSP fallback** - Use LSP formatter if conform formatter unavailable
+- **Multiple formatters** - Chain formatters (e.g., isort then black)
+- **Visual mode** - Format selected ranges only
+- **Fast execution** - Async formatting with 3-second timeout
+
+### Manual Formatting
+
+Format manually with `<leader>mp`:
+
+```vim
+" Format entire file
+<leader>mp
+
+" Format selection (in visual mode)
+V
+<select lines>
+<leader>mp
+```
+
+## Integration
+
+All editor plugins work together seamlessly:
+
+- **Treesitter + Autopairs** - Context-aware bracket insertion
+- **Flash + Treesitter** - Syntax-aware navigation
+- **Conform + LSP** - Formatting with fallback to language servers
+- **Autopairs + nvim-cmp** - Smart pairing during completion

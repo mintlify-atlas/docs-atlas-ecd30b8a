@@ -1,0 +1,465 @@
+---
+title: 'Colorscheme Configuration'
+description: 'Complete reference for colorscheme configuration and available themes'
+---
+
+## Overview
+
+nvim-luffy includes multiple high-quality colorschemes. The default colorscheme is **bamboo**, but you can easily switch between any of the installed themes.
+
+**Location:** `lua/leyland/plugins/colorscheme.lua`
+
+---
+
+## Available Colorschemes
+
+### Bamboo (Default)
+
+```lua
+{
+  "ribru17/bamboo.nvim",
+  lazy = false,
+  priority = 1000,
+}
+```
+
+**Name:** `bamboo`
+
+**Description:** A warm, nature-inspired theme with excellent contrast and readability.
+
+**Features:**
+- Multiple variants available
+- Great for long coding sessions
+- Optimized for modern plugins
+
+**Activate:**
+```vim
+:colorscheme bamboo
+```
+
+---
+
+### Catppuccin
+
+```lua
+{
+  "catppuccin/nvim",
+  name = "catppuccin",
+  priority = 1000,
+}
+```
+
+**Name:** `catppuccin`, `catppuccin-latte`, `catppuccin-frappe`, `catppuccin-macchiato`, `catppuccin-mocha`
+
+**Description:** A soothing pastel theme with multiple flavors.
+
+**Variants:**
+- **Latte** - Light theme
+- **Frappé** - Soft dark theme
+- **Macchiato** - Medium dark theme  
+- **Mocha** - Darkest variant
+
+**Activate:**
+```vim
+:colorscheme catppuccin-mocha
+```
+
+---
+
+### Tokyo Night
+
+```lua
+{
+  "folke/tokyonight.nvim",
+  priority = 1000,
+}
+```
+
+**Name:** `tokyonight`, `tokyonight-night`, `tokyonight-storm`, `tokyonight-day`, `tokyonight-moon`
+
+**Description:** A clean, dark theme inspired by Tokyo's night skyline.
+
+**Variants:**
+- **Night** - Deep dark blue
+- **Storm** - Softer dark theme
+- **Day** - Light variant
+- **Moon** - Darker with more contrast
+
+**Activate:**
+```vim
+:colorscheme tokyonight-night
+```
+
+---
+
+### Modus Themes
+
+```lua
+{
+  "miikanissi/modus-themes.nvim",
+  priority = 1000,
+}
+```
+
+**Name:** `modus_operandi`, `modus_vivendi`
+
+**Description:** Highly accessible themes designed for long-term use.
+
+**Variants:**
+- **Operandi** - Light theme with excellent contrast
+- **Vivendi** - Dark theme with excellent contrast
+
+**Activate:**
+```vim
+:colorscheme modus_vivendi
+```
+
+---
+
+### OneDark
+
+```lua
+{
+  "navarasu/onedark.nvim",
+  priority = 1000,
+}
+```
+
+**Name:** `onedark`
+
+**Description:** Atom's iconic One Dark theme.
+
+**Features:**
+- Multiple style variants
+- Classic dark theme
+- Widely recognized
+
+**Styles available:**
+- `dark`
+- `darker`
+- `cool`
+- `deep`
+- `warm`
+- `warmer`
+
+**Activate:**
+```vim
+:colorscheme onedark
+```
+
+---
+
+### Rosé Pine
+
+```lua
+{
+  "rose-pine/neovim",
+  name = "rose-pine",
+  priority = 1000,
+}
+```
+
+**Name:** `rose-pine`, `rose-pine-main`, `rose-pine-moon`, `rose-pine-dawn`
+
+**Description:** A natural, low-contrast theme inspired by the pine forest.
+
+**Variants:**
+- **Main** - Base dark theme
+- **Moon** - Deeper contrast
+- **Dawn** - Light variant
+
+**Activate:**
+```vim
+:colorscheme rose-pine
+```
+
+---
+
+## Default Colorscheme
+
+The default colorscheme is set in the rose-pine config block:
+
+```lua
+{
+  "rose-pine/neovim",
+  name = "rose-pine",
+  priority = 1000,
+  config = function()
+    vim.cmd.colorscheme("bamboo")
+  end,
+}
+```
+
+**Note:** Although defined in the rose-pine block, the actual default is `bamboo`.
+
+---
+
+## Switching Colorschemes
+
+### Temporary Switch (Current Session)
+
+```vim
+:colorscheme catppuccin-mocha
+:colorscheme tokyonight-night
+:colorscheme rose-pine
+```
+
+### Permanent Switch
+
+Edit `lua/leyland/plugins/colorscheme.lua` and change:
+
+```lua
+config = function()
+  vim.cmd.colorscheme("bamboo")  -- Change this to your preferred theme
+end,
+```
+
+For example, to use Tokyo Night:
+
+```lua
+config = function()
+  vim.cmd.colorscheme("tokyonight-night")
+end,
+```
+
+### Switch from init.lua
+
+Add after nvim-luffy loads:
+
+```lua
+-- In your init.lua
+vim.cmd.colorscheme("catppuccin-mocha")
+```
+
+---
+
+## Priority
+
+All colorscheme plugins have `priority = 1000` to ensure they load before other plugins that depend on colors.
+
+```lua
+priority = 1000,  -- Load before other plugins
+```
+
+---
+
+## Colorscheme Configuration
+
+### Configure OneDark Style
+
+Uncomment and modify the OneDark config:
+
+```lua
+{
+  "navarasu/onedark.nvim",
+  priority = 1000,
+  config = function()
+    require("onedark").setup({
+      style = "deep",  -- Options: dark, darker, cool, deep, warm, warmer
+    })
+    require("onedark").load()
+  end,
+}
+```
+
+### Configure Catppuccin
+
+```lua
+{
+  "catppuccin/nvim",
+  name = "catppuccin",
+  priority = 1000,
+  config = function()
+    require("catppuccin").setup({
+      flavour = "mocha",  -- latte, frappe, macchiato, mocha
+      transparent_background = true,
+      integrations = {
+        telescope = true,
+        nvimtree = true,
+        treesitter = true,
+      },
+    })
+  end,
+}
+```
+
+### Configure Tokyo Night
+
+```lua
+{
+  "folke/tokyonight.nvim",
+  priority = 1000,
+  config = function()
+    require("tokyonight").setup({
+      style = "night",  -- night, storm, day, moon
+      transparent = false,
+      terminal_colors = true,
+    })
+  end,
+}
+```
+
+---
+
+## API Reference
+
+### Get Current Colorscheme
+
+```lua
+local colorscheme = vim.g.colors_name
+print(colorscheme)
+```
+
+### Set Colorscheme Programmatically
+
+```lua
+vim.cmd.colorscheme("rose-pine")
+-- or
+vim.cmd([[colorscheme tokyonight-night]])
+```
+
+### Check if Colorscheme Exists
+
+```lua
+local has_colorscheme = pcall(vim.cmd.colorscheme, "bamboo")
+if has_colorscheme then
+  print("Colorscheme loaded successfully")
+else
+  print("Colorscheme not found")
+end
+```
+
+---
+
+## Adding New Colorschemes
+
+To add a new colorscheme:
+
+1. Add the plugin to `lua/leyland/plugins/colorscheme.lua`:
+
+```lua
+return {
+  -- Existing colorschemes...
+  
+  {
+    "author/colorscheme-name",
+    priority = 1000,
+  },
+}
+```
+
+2. Restart Neovim
+
+3. Activate the new colorscheme:
+
+```vim
+:colorscheme colorscheme-name
+```
+
+### Example: Adding Gruvbox
+
+```lua
+return {
+  -- Existing colorschemes...
+  
+  {
+    "ellisonleao/gruvbox.nvim",
+    priority = 1000,
+    config = function()
+      require("gruvbox").setup({
+        contrast = "hard",
+      })
+    end,
+  },
+}
+```
+
+Then:
+```vim
+:colorscheme gruvbox
+```
+
+---
+
+## Transparent Background
+
+Some terminals support transparent backgrounds. To enable:
+
+### For Catppuccin:
+
+```lua
+require("catppuccin").setup({
+  transparent_background = true,
+})
+```
+
+### For Tokyo Night:
+
+```lua
+require("tokyonight").setup({
+  transparent = true,
+})
+```
+
+### Manual (Any Theme):
+
+```lua
+vim.cmd([[
+  highlight Normal guibg=NONE ctermbg=NONE
+  highlight NormalNC guibg=NONE ctermbg=NONE
+]])
+```
+
+---
+
+## Comparison Table
+
+| Theme | Variants | Style | Best For |
+|-------|----------|-------|----------|
+| **Bamboo** | 1 | Warm, nature | Default choice, long sessions |
+| **Catppuccin** | 4 | Pastel, soft | Easy on eyes, aesthetics |
+| **Tokyo Night** | 5 | Clean, modern | Versatile, popular |
+| **Modus** | 2 | High contrast | Accessibility, clarity |
+| **OneDark** | 6 styles | Classic | Familiar, Atom users |
+| **Rosé Pine** | 3 | Low contrast | Natural, forest theme |
+
+---
+
+## Tips
+
+1. **Try multiple themes** - Use `:colorscheme <name>` to preview before committing
+2. **Match your environment** - Light themes for bright rooms, dark themes for dimmer settings
+3. **Consider contrast** - High contrast (Modus) for long sessions, low contrast (Rosé Pine) for comfort
+4. **Check plugin support** - All included themes support Telescope, LSP, and Treesitter
+5. **Terminal colors** - Ensure your terminal supports true colors for best appearance
+
+---
+
+## Enable True Colors
+
+For best colorscheme appearance, ensure true colors are enabled:
+
+```lua
+vim.opt.termguicolors = true
+```
+
+**Note:** This is commented out in core options but recommended for colorscheme support.
+
+---
+
+## Random Colorscheme on Startup
+
+For variety:
+
+```lua
+local colorschemes = {
+  "bamboo",
+  "catppuccin-mocha",
+  "tokyonight-night",
+  "rose-pine",
+}
+
+math.randomseed(os.time())
+local random_scheme = colorschemes[math.random(#colorschemes)]
+vim.cmd.colorscheme(random_scheme)
+```

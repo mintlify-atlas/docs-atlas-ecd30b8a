@@ -1,0 +1,323 @@
+---
+title: 'Treesitter Configuration'
+description: 'Complete reference for Treesitter syntax highlighting configuration'
+---
+
+## Overview
+
+Treesitter provides advanced syntax highlighting, incremental parsing, and AST-based code understanding for nvim-luffy.
+
+**Location:** `lua/leyland/plugins/treesitter.lua`
+
+---
+
+## Plugin Specification
+
+```lua
+return {
+  "nvim-treesitter/nvim-treesitter",
+  branch = "master",
+  event = { "BufReadPre", "BufNewFile" },
+  build = ":TSUpdate",
+}
+```
+
+### Loading
+
+<ParamField path="event" type="table" default='{ "BufReadPre", "BufNewFile" }'>
+  Lazy loads Treesitter when:
+  - Opening an existing file (`BufReadPre`)
+  - Creating a new file (`BufNewFile`)
+</ParamField>
+
+<ParamField path="build" type="string" default=":TSUpdate">
+  Runs `:TSUpdate` after installation to compile parsers
+</ParamField>
+
+---
+
+## Configuration
+
+### Ensured Parsers
+
+These language parsers are automatically installed:
+
+```lua
+require("nvim-treesitter").setup({
+  ensure_installed = {
+    "json",
+    "javascript",
+    "typescript",
+    "tsx",
+    "yaml",
+    "html",
+    "css",
+    "prisma",
+    "markdown",
+    "markdown_inline",
+    "svelte",
+    "graphql",
+    "bash",
+    "lua",
+    "vim",
+    "dockerfile",
+    "gitignore",
+    "query",
+    "vimdoc",
+    "c",
+  },
+})
+```
+
+---
+
+## Installed Parsers
+
+| Language | Parser | Description |
+|----------|--------|-------------|
+| JSON | `json` | JSON files |
+| JavaScript | `javascript` | JavaScript files |
+| TypeScript | `typescript` | TypeScript files |
+| TSX | `tsx` | TypeScript React files |
+| YAML | `yaml` | YAML configuration files |
+| HTML | `html` | HTML files |
+| CSS | `css` | CSS stylesheets |
+| Prisma | `prisma` | Prisma schema files |
+| Markdown | `markdown` | Markdown documents |
+| Markdown Inline | `markdown_inline` | Inline markdown (in code comments, etc.) |
+| Svelte | `svelte` | Svelte component files |
+| GraphQL | `graphql` | GraphQL queries and schemas |
+| Bash | `bash` | Bash shell scripts |
+| Lua | `lua` | Lua scripts (Neovim config) |
+| Vim | `vim` | Vimscript files |
+| Dockerfile | `dockerfile` | Docker configuration files |
+| Gitignore | `gitignore` | .gitignore files |
+| Query | `query` | Treesitter query files |
+| Vimdoc | `vimdoc` | Vim help documentation |
+| C | `c` | C source files |
+
+---
+
+## Language Registration
+
+### Bash for Zsh
+
+```lua
+vim.treesitter.language.register("bash", "zsh")
+```
+
+Registers the bash parser to also handle zsh files, providing syntax highlighting for zsh scripts.
+
+---
+
+## Treesitter Commands
+
+| Command | Description |
+|---------|-------------|
+| `:TSInstall <language>` | Install a language parser |
+| `:TSUpdate` | Update all installed parsers |
+| `:TSUpdate <language>` | Update specific parser |
+| `:TSUninstall <language>` | Uninstall a parser |
+| `:TSInstallInfo` | Show installed parsers |
+| `:TSModuleInfo` | Show enabled/disabled modules |
+
+---
+
+## Features Enabled
+
+Treesitter in nvim-luffy enables:
+
+### Syntax Highlighting
+
+Advanced, accurate syntax highlighting based on the AST (Abstract Syntax Tree) rather than regex patterns.
+
+**Benefits:**
+- More accurate than traditional regex highlighting
+- Context-aware highlighting
+- Better handling of complex nested structures
+- Consistent across languages
+
+### Incremental Parsing
+
+Only re-parses changed portions of files for better performance.
+
+### Code Understanding
+
+Provides a queryable AST for plugins to use:
+- Code navigation
+- Refactoring tools
+- Textobjects
+- Code folding
+
+---
+
+## API Reference
+
+### Adding a Parser
+
+To add support for a new language:
+
+1. Add to `ensure_installed` in `lua/leyland/plugins/treesitter.lua`:
+
+```lua
+ensure_installed = {
+  -- Existing parsers...
+  "rust",  -- Add Rust support
+  "go",    -- Add Go support
+}
+```
+
+2. Restart Neovim - Treesitter will automatically install the parsers
+
+### Manual Parser Installation
+
+```vim
+:TSInstall python
+:TSInstall ruby
+```
+
+### Check Installed Parsers
+
+```vim
+:TSInstallInfo
+```
+
+### Register Language Alias
+
+```lua
+-- Use JavaScript parser for .mjs files
+vim.treesitter.language.register("javascript", "mjs")
+
+-- Use TypeScript parser for .cts files
+vim.treesitter.language.register("typescript", "cts")
+```
+
+---
+
+## Customization Examples
+
+### Disable Highlighting for Specific Filetype
+
+```lua
+require("nvim-treesitter").setup({
+  ensure_installed = { ... },
+  highlight = {
+    enable = true,
+    disable = { "markdown" },  -- Disable for markdown
+  },
+})
+```
+
+### Enable Additional Modules
+
+```lua
+require("nvim-treesitter").setup({
+  ensure_installed = { ... },
+  highlight = { enable = true },
+  indent = { enable = true },  -- Treesitter-based indentation
+  incremental_selection = {
+    enable = true,
+    keymaps = {
+      init_selection = "gnn",
+      node_incremental = "grn",
+      scope_incremental = "grc",
+      node_decremental = "grm",
+    },
+  },
+})
+```
+
+### Auto-install Parsers
+
+```lua
+require("nvim-treesitter").setup({
+  ensure_installed = { ... },
+  auto_install = true,  -- Auto-install parser for new filetypes
+})
+```
+
+---
+
+## Language Support
+
+### Web Development
+
+- **HTML** - Full HTML5 support
+- **CSS** - CSS and SCSS
+- **JavaScript** - Modern JavaScript (ES6+)
+- **TypeScript** - TypeScript and TSX
+- **Svelte** - Svelte components
+- **GraphQL** - GraphQL queries and schemas
+
+### Scripting
+
+- **Lua** - Neovim configuration
+- **Bash** - Shell scripts (includes zsh)
+- **Vim** - Vimscript
+
+### Data Formats
+
+- **JSON** - JSON files
+- **YAML** - YAML configuration
+- **Markdown** - Markdown documents
+
+### Other
+
+- **Prisma** - Prisma ORM schemas
+- **Dockerfile** - Docker files
+- **Gitignore** - .gitignore patterns
+- **C** - C programming language
+
+---
+
+## Troubleshooting
+
+### Parser Not Highlighting
+
+1. Check if parser is installed: `:TSInstallInfo`
+2. Install manually: `:TSInstall <language>`
+3. Update parsers: `:TSUpdate`
+
+### Highlighting Errors
+
+1. Update parsers: `:TSUpdate`
+2. Check Treesitter status: `:TSModuleInfo`
+3. Disable and re-enable: `:TSDisable highlight` then `:TSEnable highlight`
+
+### Parser Compilation Fails
+
+Ensure you have a C compiler installed:
+- **Linux:** `gcc` or `clang`
+- **macOS:** Xcode Command Line Tools
+- **Windows:** MSVC or MinGW
+
+### Performance Issues
+
+For very large files, you can disable Treesitter:
+
+```lua
+vim.api.nvim_create_autocmd("BufEnter", {
+  pattern = "*.large",
+  callback = function()
+    vim.cmd("TSDisable highlight")
+  end,
+})
+```
+
+---
+
+## Parser Query Files
+
+Treesitter uses query files to define highlighting and other features:
+
+```
+~/.local/share/nvim/lazy/nvim-treesitter/queries/
+├── javascript/
+│   ├── highlights.scm
+│   ├── injections.scm
+│   └── locals.scm
+├── typescript/
+└── ...
+```
+
+You can create custom queries in `~/.config/nvim/queries/` to override defaults.
